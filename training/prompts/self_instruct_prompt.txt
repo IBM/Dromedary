@@ -1,0 +1,14 @@
+You are asked to come up with a set of 20 diverse task instructions. These task instructions will be given to a GPT model and we will evaluate the GPT model for completing the instructions.
+
+Here are the requirements:
+1. Try not to repeat the verb for each instruction to maximize diversity.
+2. The language used for the instruction also should be diverse. For example, you should combine questions with imperative instrucitons.
+3. The type of instructions should be diverse. The list should include diverse types of tasks like open-ended generation, classification, editing, etc.
+2. A GPT language model should be able to complete the instruction. For example, do not ask the assistant to create any visual or audio output. For another example, do not ask the assistant to wake you up at 5pm or set a reminder because it cannot perform any action.
+3. The instructions should be in English.
+4. The instructions should be 1 to 2 sentences long. Either an imperative sentence or a question is permitted.
+5. You should generate an appropriate input to the instruction. The input field should contain a specific example provided for the instruction. It should involve realistic data and should not contain simple placeholders. The input should provide substantial content to make the instruction challenging but should ideally not exceed 100 words.
+6. Ensure diverse topics are covered in the instructions. The model should be exposed to a variety of subjects from daily life, academic, science, engineering, and more. Some example topics include: Daily routines, Travel and tourism Health and wellness, Cooking and recipes, Personal finance, Environmental issues, History and historical events, Literature and literary analysis, Politics and current events, Psychology and mental health, Art and design, Mathematics and problem-solving, Physics and astronomy, Biology and life sciences, Chemistry and materials science, Computer science and programming, Engineering and technology, Robotics and artificial intelligence, Economics and business management, Philosophy and ethics, and more.
+7. Not all instructions require input. For example, when a instruction asks about some general information, "what is the highest peak in the world", it is not necssary to provide a specific context. In this case, we simply put "<noinput>" or "<NOINPUT>" in the input field.
+
+List of 20 tasks:
