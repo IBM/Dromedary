@@ -16,7 +16,7 @@ bash scripts/demo_dromedary_6shards.sh
 
 Generally, since the Dromedary is a 65B model, it requires a minimum of 130GB GPU memory to accommodate the entirety of its model weights within the GPU memory.
 
-When using [FSDP](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/) on `MP = 1, 2, 4, 8` GPUs, you should divide the model to `MP` shards with `utils/convert_hf_weights_to_llama_ckpt.py`
+When using [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) on `MP = 1, 2, 4, 8` GPUs, you should divide the model to `MP` shards with `utils/convert_hf_weights_to_llama_ckpt.py`
 
 ```bash
 python -u utils/convert_hf_weights_to_llama_ckpt.py \
@@ -28,7 +28,7 @@ python -u utils/convert_hf_weights_to_llama_ckpt.py \
     --lora_r=16
 ```
 
-When using FSDP on `MP = 3, 6, 12` GPUs, we recommend use `utils/convert_hf_weights_to_llama_expanded.py` to divide the checkpoint shards and install our customized `llama_dromedary` package for inference.
+When using model parallel on `MP = 3, 6, 12` GPUs, we recommend use `utils/convert_hf_weights_to_llama_expanded.py` to divide the checkpoint shards and install our customized `llama_dromedary` package for inference.
 
 ```bash
 python -u utils/convert_hf_weights_to_llama_ckpt_expanded.py \
