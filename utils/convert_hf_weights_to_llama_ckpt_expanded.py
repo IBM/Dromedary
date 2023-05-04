@@ -111,7 +111,7 @@ def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size
         v_dim_1 = v.shape[1]
 
         assert expanded_att_dim >= v_dim_1
-        if expanded_vocab_size == v_dim_1:
+        if expanded_att_dim == v_dim_1:
             return v
         new_v = torch.zeros(
             v_dim_0, expanded_att_dim - v_dim_1, dtype=v.dtype, device=v.device
@@ -137,7 +137,7 @@ def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size
         v_dim_1 = v.shape[1]
 
         assert expanded_ffn_dim >= v_dim_0
-        if expanded_vocab_size == v_dim_1:
+        if expanded_ffn_dim == v_dim_1:
             return v
         new_v = torch.zeros(
             v_dim_0, expanded_ffn_dim - v_dim_1, dtype=v.dtype, device=v.device
