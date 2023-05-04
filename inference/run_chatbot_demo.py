@@ -29,6 +29,12 @@ def setup_model_parallel() -> Tuple[int, int]:
     global_rank = int(os.environ.get("RANK", -1))
     world_size = int(os.environ.get("WORLD_SIZE", -1))
 
+    if world_size not in [1, 2, 4, 8, 16, 32] and not use_llama_dromedary:
+        raise ValueError(
+            "Only the following world sizes are supported: 1, 2, 4, 8, 16, 32 for the original llama code. "
+            "For llama_dromedary, any world size is supported."
+        )
+
     torch.distributed.init_process_group("nccl")
     initialize_model_parallel(world_size, pipeline_length=1)
     print("Model parallelism:", mpu.get_model_parallel_world_size())

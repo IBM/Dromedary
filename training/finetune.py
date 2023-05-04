@@ -475,8 +475,6 @@ def train(
 
 
 def generate_prompt_dromedary(data_point, meta_prompts):
-    # sorry about the formatting disaster gotta move fast
-
     assert "example_id" in data_point
     total_meta_prompt = len(meta_prompts)
     meta_prompt = meta_prompts[int(data_point["example_id"]) % total_meta_prompt]

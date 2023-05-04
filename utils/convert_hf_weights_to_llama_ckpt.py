@@ -138,7 +138,9 @@ def main(
             task_type="CAUSAL_LM",
         )
         lora_model = get_peft_model(model, config)
-        lora_model = set_peft_model_state_dict(lora_model, adapters_weights)
+        tmp_lora_model = set_peft_model_state_dict(lora_model, adapters_weights)
+        if tmp_lora_model is not None:
+            lora_model = tmp_lora_model
 
         # merge weights
         for layer in lora_model.base_model.model.model.layers:

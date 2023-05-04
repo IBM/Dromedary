@@ -43,7 +43,7 @@ pip install -e .
 cd ..
 ```
 
-Also, you should least install the packages required for inference:
+In addition, you should at least install the packages required for inference:
 ```bash
 cd inference
 pip install -r requirements.txt
