@@ -130,3 +130,6 @@ dmypy.json
 
 .DS_Store
 .idea
+
+# temporary scripts
+tmp_scripts/

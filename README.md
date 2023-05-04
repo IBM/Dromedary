@@ -30,6 +30,7 @@ In a conda env with pytorch / cuda available, run:
 cd llama_dromedary
 pip install -r requirements.txt
 pip install -e .
+cd ..
 ```
 
 Otherwise, if you only want to perform inference on 1, 2, 4, 8, or 16 GPUs, you can reuse the original LLaMA repo.
@@ -39,6 +40,13 @@ git clone https://github.com/facebookresearch/llama.git
 cd llama
 pip install -r requirements.txt
 pip install -e .
+cd ..
+```
+
+Also, you should least install the packages required for inference:
+```bash
+cd inference
+pip install -r requirements.txt
 ```
 
 ## Model Weights

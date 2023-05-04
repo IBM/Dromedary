@@ -2,12 +2,12 @@
 
 ## Quick Start
 
-Assuming you have 2 A100-80GB GPUs and have devide the Dromedary/LLaMA checkpoints into 2 shards.
+Assuming you have 2 A100-80GB GPUs and have devide/download the Dromedary/LLaMA checkpoints into 2 shards.
 ```bash
 bash scripts/demo_dromedary_2shards.sh
 ```
 
-Or assuming you have 6 V100-32GB GPUs and have devide the Dromedary/LLaMA checkpoints into 6 shards.
+Or assuming you have 6 V100-32GB GPUs and have devide/download the Dromedary/LLaMA checkpoints into 6 shards.
 ```bash
 bash scripts/demo_dromedary_6shards.sh
 ```
@@ -15,6 +15,8 @@ bash scripts/demo_dromedary_6shards.sh
 ## Further Customization
 
 Generally, since Dromedary is a 65B model, it requires a minimum of 130GB GPU memory to accommodate the entirety of its model weights within the GPU memory.
+
+### Customized Model Sharding
 
 When using [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) on `MP = 1, 2, 4, 8` GPUs, you should divide the model to `MP` shards with `utils/convert_hf_weights_to_llama_ckpt.py`
 
