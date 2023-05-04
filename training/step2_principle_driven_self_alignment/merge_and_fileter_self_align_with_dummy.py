@@ -2,7 +2,7 @@
 Merge the data from the self-alignment dataset.
 
 run:
-python merge_self_align_with_dummy.py \
+python merge_and_fileter_self_align_with_dummy.py \
     --data_file_pattern "/path/to/your/llama65b_self_align_32shards_*.jsonl" \
     --dummy_data_file "../dummy_data/vicuna_dummy_data.json" \
     --output_file /path/to/your/llama65b_self_align_merged.json

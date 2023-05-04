@@ -1,6 +1,6 @@
-# We use 8 x 6 = 48 V100-32 GPUs
+# We use 16 x 6 = 96 V100-32 GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
-# salloc --nodes 8 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_dromedary_65b_non_verbose.sh
+# salloc --nodes 8 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_dromedary_65b_final.sh
 
 # Due to some unknown issues in HF datasets library, we recommend run `finetune.py`
 # with --fake_run flag to prepare the dataset on your local machine,
@@ -47,14 +47,14 @@ accelerate launch \
     --num_epochs $NUM_EPOCHS \
     --ds_gradient_accumulation_steps $GRADIENT_ACCUMULATION_STEPS \
     --base_model "/path/to/your/llama-65b-hf" \
-    --output_dir "$MODEL_DIR/dromedary-65b-lora-non-verbose" \
+    --output_dir "$MODEL_OUTPUT_DIR" \
     --run_tensorboard_dir True \
     --checkpointing_steps $CKPT_STEPS \
     --resume_from_checkpoint True \
-    --data_path "$DATA_DIR/llama65b_self_align_merged.json" \
-    --meta_prompt_pattern "../prompts/inference_prompts/dromedary_standard_prompt_distill.txt" \
+    --data_path "$DATA_DIR/llama65b_verbose_clone_merged.json" \
+    --meta_prompt_pattern "../prompts/dromedary_*prompt_distill.txt" \
     --add_eos_token False \
-    --cutoff_len 512 \
+    --cutoff_len 768 \
     --train_on_inputs False \
     --lora_target_modules='[q_proj,k_proj,v_proj,o_proj]' \
     --lora_r=16 \
