@@ -97,6 +97,7 @@ def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        assert expanded_att_dim >= v_dim_0
         if expanded_att_dim == v_dim_0:
             return v
         new_v = torch.zeros(
@@ -109,6 +110,7 @@ def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        assert expanded_att_dim >= v_dim_1
         if expanded_vocab_size == v_dim_1:
             return v
         new_v = torch.zeros(
@@ -121,6 +123,7 @@ def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        assert expanded_ffn_dim >= v_dim_1
         if expanded_ffn_dim == v_dim_1:
             return v
         new_v = torch.zeros(
@@ -133,6 +136,7 @@ def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        assert expanded_ffn_dim >= v_dim_0
         if expanded_vocab_size == v_dim_1:
             return v
         new_v = torch.zeros(
@@ -145,6 +149,7 @@ def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        assert expanded_vocab_size >= v_dim_0
         if expanded_vocab_size == v_dim_0:
             return v
         new_v = torch.zeros(

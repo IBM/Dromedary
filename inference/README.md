@@ -38,8 +38,8 @@ python -u utils/convert_hf_weights_to_llama_ckpt_expanded.py \
     --lora_weights "/path/to/your/lora/weights" \
     --output_dir "/path/to/your/sharded_ckpt" \
     --total_ranks MP \
-    --expanded_att_dim 8352 \
-    --expanded_ffn_dim 22176 \
+    --expanded_att_dim 9216 \
+    --expanded_ffn_dim 23040 \
     --expanded_vocab_size 32256 \
     --lora_target_modules='[q_proj,k_proj,v_proj,o_proj]' \
     --lora_r=16
@@ -53,8 +53,8 @@ python -u utils/convert_hf_weights_to_llama_ckpt_expanded.py \
     --lora_weights "/path/to/your/lora/weights" \
     --output_dir "/path/to/your/sharded_ckpt" \
     --total_ranks MP \
-    --expanded_att_dim 8200 \
-    --expanded_ffn_dim 22200 \
+    --expanded_att_dim 8320 \
+    --expanded_ffn_dim 22400 \
     --expanded_vocab_size 32000 \
     --lora_target_modules='[q_proj,k_proj,v_proj,o_proj]' \
     --lora_r=16
