@@ -33,9 +33,13 @@ from peft import (  # noqa: E402
     get_peft_model,
     get_peft_model_state_dict,
 )
-# from transformers import LlamaForCausalLM, LlamaTokenizer
 from transformers import LlamaForCausalLM
-from transformers import LlamaTokenizerFast as LlamaTokenizer
+try:
+    from transformers import LlamaTokenizerFast as LlamaTokenizer
+    print("Using fast tokenizer")
+except:
+    from transformers import LlamaTokenizer
+    print("Using slow tokenizer")
 
 
 logger = get_logger(__name__)
