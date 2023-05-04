@@ -58,11 +58,11 @@ We release Dromedary weights as delta weights to comply with the LLaMA model lic
 
 ## Inference
 
-We provide a [chatbot demo](inference/README.md) for Dromedary.
+We provide a [chatbot demo](inference) for Dromedary.
 
 ## Training
 
-We provide the full [training pipeline](training/README.md) of Dromedary for reproduction.
+We provide the full [training pipeline](training) of Dromedary for reproduction.
 
 ## Prompts
 
@@ -70,9 +70,10 @@ All the human annotations used in this project can be found [here](prompts).
 
 ### TODOs
 
-- [ ] Add the code for TruthfulQA and HHH Eval evaluation.
-- [ ] Fix the Huggingface datasets bug in the fine-tuning pipeline.
+- [ ] Add the requirements.txt for the training pipeline.
+- [ ] Add the evaluation code for TruthfulQA and HHH Eval.
 - [ ] Release Dromedary delta weights at Huggingface model hub.
+- [ ] Fix the Huggingface datasets/accelerate bug of fine-tuning in distributed setting.
 
 ### Citation
 

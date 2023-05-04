@@ -2,6 +2,10 @@
 
 The whole *SELF-ALIGN* process involves four distinct stages.
 
+## Prerequisites
+
+For efficiency concerns, we utilize the [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) scheme from [llama](https://github.com/facebookresearch/llama) when generating synthetic instructions and self-aligned responses. To prepare the sharded model checkpoints of LLaMA and Dromedary on your own machine/cluster, please refer to our [inference guide](../inference).
+
 ## Stage 1: Topic-Guided Red-Teaming Self-Instruct
 
 The first stage is called **Topic-Guided Red-Teaming Self-Instruct**, which employs the language model itself to generate synthetic instructions and enhance diversity via a topic-guided red-teaming approach.
