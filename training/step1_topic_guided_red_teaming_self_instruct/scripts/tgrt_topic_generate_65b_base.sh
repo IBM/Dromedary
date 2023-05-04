@@ -33,8 +33,8 @@ torchrun --nproc_per_node $GPUS_PER_NODE \
   --max_shared_seq_len 256 \
   --max_seq_len 128 \
   --generate_max_len 128 \
-  --meta_prompt_file "../prompts/tgrt_self_instruct_topic_brainstorm_prompt.txt" \
-  --seed_questions_path "../prompts/tgrt_self_instruct_seed_questions.jsonl" \
+  --meta_prompt_file "../../prompts/prompts/tgrt_self_instruct_topic_brainstorm_prompt.txt" \
+  --seed_questions_path "../../prompts/tgrt_self_instruct_seed_questions.jsonl" \
   --output_path "$DATA_DIR/llama65b_tgrt_topics.jsonl" \
   --num_examples 5 \
   --generation_epoch 9 \

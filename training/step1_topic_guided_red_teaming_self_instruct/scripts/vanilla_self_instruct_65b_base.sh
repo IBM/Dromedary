@@ -34,8 +34,8 @@ torchrun --nproc_per_node $GPUS_PER_NODE \
   --generate_max_len 1024 \
   --group_rank $GROUP_RANK \
   --group_size $GROUP_SIZE \
-  --meta_prompt_file "../prompts/self_instruct_prompt.txt" \
-  --seed_tasks_path "../prompts/self_instruct_seed_tasks.jsonl" \
+  --meta_prompt_file "../../prompts/self_instruct_prompt.txt" \
+  --seed_tasks_path "../../prompts/self_instruct_seed_tasks.jsonl" \
   --output_path "$DATA_DIR/llama65b_self_instruct_${GROUP_SIZE}shards_${GROUP_RANK}.jsonl" \
   --num_instructions_to_generate 8192 \
   --num_prompt_instructions 5 \

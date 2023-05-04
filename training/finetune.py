@@ -33,20 +33,19 @@ from peft import (  # noqa: E402
     get_peft_model,
     get_peft_model_state_dict,
 )
-from transformers import LlamaForCausalLM, LlamaTokenizer  # noqa: F402
+# from transformers import LlamaForCausalLM, LlamaTokenizer
+from transformers import LlamaForCausalLM
+from transformers import LlamaTokenizerFast as LlamaTokenizer
 
 
 logger = get_logger(__name__)
 
 
-def get_deepspeed_plugin(gradient_accumulation_steps, use_fast_zero3):
+def get_deepspeed_plugin(gradient_accumulation_steps):
     from accelerate import DeepSpeedPlugin
     mixed_precision = "fp16"
     deepspeed_plugin = DeepSpeedPlugin(
-        hf_ds_config=(
-            "ds_config_zero3_fast.json" if use_fast_zero3
-            else "ds_config_zero3.json"
-        ),
+        hf_ds_config="ds_config_zero3.json",
         zero3_init_flag=True,
         zero3_save_16bit_model=True,
         gradient_accumulation_steps=gradient_accumulation_steps,
@@ -89,7 +88,6 @@ def train(
     ds_gradient_accumulation_steps: int = 1,
     num_warmup_steps: int = 100,
     disable_gradient_checkpointing: bool = False,
-    use_fast_zero3: bool = False,
     meta_prompt_pattern: str = "none",
     add_eos_token: bool = True,
     fake_run: bool = False,
@@ -138,7 +136,7 @@ def train(
     use_tensorboard = run_tensorboard_dir
 
     mixed_precision, deepspeed_plugin = get_deepspeed_plugin(
-        ds_gradient_accumulation_steps, use_fast_zero3)
+        ds_gradient_accumulation_steps)
 
     accelerator = Accelerator(
         mixed_precision=mixed_precision,

@@ -39,8 +39,8 @@ torchrun --nproc_per_node $GPUS_PER_NODE \
   --generate_max_len 384 \
   --group_rank $GROUP_RANK \
   --group_size $GROUP_SIZE \
-  --meta_prompt_file "../prompts/tgrt_self_instruct_question_generation_prompt.txt" \
-  --seed_questions_path "../prompts/tgrt_self_instruct_seed_questions.jsonl" \
+  --meta_prompt_file "../../prompts/tgrt_self_instruct_question_generation_prompt.txt" \
+  --seed_questions_path "../../prompts/tgrt_self_instruct_seed_questions.jsonl" \
   --seed_topics_path "$DATA_DIR/llama65b_tgrt_topics_epoch5_deduplicated.jsonl" \
   --output_path "$DATA_DIR/llama65b_tgrt_questions_${GROUP_SIZE}shards_${GROUP_RANK}.jsonl" \
   --request_batch_size 32 \

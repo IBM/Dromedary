@@ -41,6 +41,6 @@ torchrun --nproc_per_node $GPUS_PER_NODE \
   --group_size $GROUP_SIZE \
   --input_file "$DATA_DIR/llama65b_all_synthetic_inputs_merged.json" \
   --output_file "$DATA_DIR/llama65b_self_align_${GROUP_SIZE}shards_${GROUP_RANK}.json" \
-  --meta_prompt_file "../prompts/watson_self_align_prompt.txt" \
+  --meta_prompt_file "../../prompts/watson_self_align_prompt.txt" \
   --temperature 0.5 \
   --top_p 0.95
