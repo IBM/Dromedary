@@ -46,7 +46,7 @@ pip install -e .
 We release Dromedary weights as delta weights to comply with the LLaMA model license. You can add our delta to the original LLaMA weights to obtain the Dromedary weights. Instructions:
 
 1. Get the original LLaMA weights in the huggingface format by following the instructions [here](https://huggingface.co/docs/transformers/main/model_doc/llama).
-2. Follow our [inference guide](inference) to see how to deploy Dromedary/LLaMA on your own machine configuration with [FSDP](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/).
+2. Follow our [inference guide](inference) to see how to deploy Dromedary/LLaMA on your own machine with [FSDP](https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/) (which should be significantly faster than Huggingface's default pipeline parallel).
 
 ## Inference
 
