@@ -14,7 +14,7 @@ bash scripts/demo_dromedary_6shards.sh
 
 ## Further Customization
 
-In general, when using FSDP on `N = 1, 2, 4, 8` GPUs, you should divide the model to `N` shards with `utils/convert_hf_weights_to_llama_ckpt.py`
+In general, when using (FSDP)[https://pytorch.org/blog/introducing-pytorch-fully-sharded-data-parallel-api/] on `N = 1, 2, 4, 8` GPUs, you should divide the model to `N` shards with `utils/convert_hf_weights_to_llama_ckpt.py`
 
 ```bash
 python -u utils/convert_hf_weights_to_llama_ckpt.py \
