@@ -83,4 +83,4 @@ TBD
 ### Acknowledgements
 
 We thank Yizhong Wang for providing the code for the parse analysis plot.
-We also thank [Meta LLaMA team](https://github.com/facebookresearch/llama), [Standford Alpaca team](https://github.com/tatsu-lab/stanford_alpaca), [Vicuna team](https://github.com/lm-sys/FastChat), [Alpaca-LoRA](https://github.com/tloen/alpaca-lora), and [Huggingface PEFT](https://github.com/huggingface/peft) for their efforts in democratizing large language models.
+We also thank [Meta LLaMA team](https://github.com/facebookresearch/llama), [Standford Alpaca team](https://github.com/tatsu-lab/stanford_alpaca), [Vicuna team](https://github.com/lm-sys/FastChat), [Alpaca-LoRA](https://github.com/tloen/alpaca-lora), and [Huggingface PEFT](https://github.com/huggingface/peft) for their open-source efforts in democratizing large language models.
