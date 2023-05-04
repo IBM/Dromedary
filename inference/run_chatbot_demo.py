@@ -131,7 +131,7 @@ def main(
         max_new_tokens=128,
         **kwargs,
     ):
-        # sync the process with barrier and catch timeout
+        # sync the process with torch.distributed.barrier
         torch.distributed.barrier()
 
         # sync the prompt string across all processes, max_len=4096
@@ -165,11 +165,11 @@ def main(
 
         return thought, output
 
-    model_name = "self-align"
-
-    def run_fake_demo():
+    def run_fake_evaluate():
         while True:
             prompt = "Fake prompt"
+            # sync the process with torch.distributed.barrier
+            # TODO(zhiqings): find a better way to sync the processes, and avoid timeout in barrier
             torch.distributed.barrier()
 
             # sync the prompt string across all processes
@@ -202,8 +202,8 @@ def main(
             )[0]
 
     if global_rank != 0:
-        run_fake_demo()
-    
+        run_fake_evaluate()
+
     def inference_chat(
         text_input,
         temperature,

@@ -92,13 +92,15 @@ def shard_weights(k, v, rank, total_ranks):
         raise NotImplementedError
 
 
-def expand_weights(k, v, target_att_dim, target_ffn_dim, target_vocab_size):
+def expand_weights(k, v, expanded_att_dim, expanded_ffn_dim, expanded_vocab_size):
     if "wq" in k or "wk" in k or "wv" in k:
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        if expanded_att_dim == v_dim_0:
+            return v
         new_v = torch.zeros(
-            target_att_dim - v_dim_0, v_dim_1, dtype=v.dtype, device=v.device
+            expanded_att_dim - v_dim_0, v_dim_1, dtype=v.dtype, device=v.device
         )
         new_v = torch.concat([v, new_v], dim=0)
         return new_v
@@ -107,8 +109,10 @@ def expand_weights(k, v, target_att_dim, target_ffn_dim, target_vocab_size):
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        if expanded_vocab_size == v_dim_1:
+            return v
         new_v = torch.zeros(
-            v_dim_0, target_att_dim - v_dim_1, dtype=v.dtype, device=v.device
+            v_dim_0, expanded_att_dim - v_dim_1, dtype=v.dtype, device=v.device
         )
         new_v = torch.concat([v, new_v], dim=1)
         return new_v
@@ -117,18 +121,22 @@ def expand_weights(k, v, target_att_dim, target_ffn_dim, target_vocab_size):
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        if expanded_ffn_dim == v_dim_1:
+            return v
         new_v = torch.zeros(
-            target_ffn_dim - v_dim_0, v_dim_1, dtype=v.dtype, device=v.device
+            expanded_ffn_dim - v_dim_0, v_dim_1, dtype=v.dtype, device=v.device
         )
         new_v = torch.concat([v, new_v], dim=0)
         return new_v
-    
+
     elif "w2" in k:
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        if expanded_vocab_size == v_dim_1:
+            return v
         new_v = torch.zeros(
-            v_dim_0, target_ffn_dim - v_dim_1, dtype=v.dtype, device=v.device
+            v_dim_0, expanded_ffn_dim - v_dim_1, dtype=v.dtype, device=v.device
         )
         new_v = torch.concat([v, new_v], dim=1)
         return new_v
@@ -137,8 +145,10 @@ def expand_weights(k, v, target_att_dim, target_ffn_dim, target_vocab_size):
         v_dim_0 = v.shape[0]
         v_dim_1 = v.shape[1]
 
+        if expanded_vocab_size == v_dim_0:
+            return v
         new_v = torch.zeros(
-            target_vocab_size - v_dim_0, v_dim_1, dtype=v.dtype, device=v.device
+            expanded_vocab_size - v_dim_0, v_dim_1, dtype=v.dtype, device=v.device
         )
         new_v = torch.concat([v, new_v], dim=0)
         return new_v
@@ -161,15 +171,15 @@ def main(
     output_dir: str = None,
     total_ranks: int = 1,
     write_mode: bool = False,
-    target_att_dim: int = 0,
-    target_ffn_dim: int = 0,
-    target_vocab_size: int = 0,
+    expanded_att_dim: int = 0,
+    expanded_ffn_dim: int = 0,
+    expanded_vocab_size: int = 0,
 ):
     if output_dir is None:
         raise ValueError("output_dir must be specified")
 
-    if target_att_dim == 0 or target_ffn_dim == 0 or target_vocab_size == 0:
-        raise ValueError("target_att_dim, target_ffn_dim, target_vocab_size must be specified")
+    if expanded_att_dim == 0 or expanded_ffn_dim == 0 or expanded_vocab_size == 0:
+        raise ValueError("expanded_att_dim, expanded_ffn_dim, expanded_vocab_size must be specified")
 
 
     if lora_weights == "none":
@@ -233,9 +243,9 @@ def main(
         "n_layers": model_config.num_hidden_layers,
         "norm_eps": model_config.rms_norm_eps,
         "vocab_size": -1,
-        "qkv_dim": target_att_dim,
-        "ffn_dim": target_ffn_dim,
-        "model_vocab_size": target_vocab_size,
+        "qkv_dim": expanded_att_dim,
+        "ffn_dim": expanded_ffn_dim,
+        "model_vocab_size": expanded_vocab_size,
     }
     n_heads = params["n_heads"]
     dim = params["dim"]
@@ -267,9 +277,9 @@ def main(
                     new_v = v
 
                 new_v = expand_weights(new_k, new_v,
-                                       target_att_dim,
-                                       target_ffn_dim,
-                                       target_vocab_size)
+                                       expanded_att_dim,
+                                       expanded_ffn_dim,
+                                       expanded_vocab_size)
 
                 new_v = shard_weights(new_k, new_v, rank, total_ranks)
                 if "layers" not in new_k or "layers.0" in new_k:

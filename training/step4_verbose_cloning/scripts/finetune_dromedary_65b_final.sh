@@ -1,4 +1,4 @@
-# We use 16 x 6 = 96 V100-32 GPUs
+# We use 16 x 6 = 96 V100-32GB GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
 # salloc --nodes 8 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_dromedary_65b_final.sh
 
@@ -47,7 +47,7 @@ accelerate launch \
     --num_epochs $NUM_EPOCHS \
     --ds_gradient_accumulation_steps $GRADIENT_ACCUMULATION_STEPS \
     --base_model "/path/to/your/llama-65b-hf" \
-    --output_dir "$MODEL_OUTPUT_DIR" \
+    --output_dir "$MODEL_DIR/dromedary-65b-lora-final" \
     --run_tensorboard_dir True \
     --checkpointing_steps $CKPT_STEPS \
     --resume_from_checkpoint True \

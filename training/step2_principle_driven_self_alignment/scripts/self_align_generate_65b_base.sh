@@ -1,4 +1,4 @@
-# We use 64 x 6 = 384 V100-32 GPUs
+# We use 64 x 6 = 384 V100-32GB GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
 # salloc --nodes 64 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/self_align_generate_65b_base.sh
 

@@ -1,4 +1,4 @@
-# We use 8 x 6 = 48 V100-32 GPUs
+# We use 8 x 6 = 48 V100-32GB GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
 # salloc --nodes 8 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_dromedary_65b_non_verbose.sh
 

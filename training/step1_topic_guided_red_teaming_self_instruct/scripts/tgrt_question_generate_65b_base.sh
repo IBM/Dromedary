@@ -1,4 +1,4 @@
-# We use 16 x 6 = 96 V100-32 GPUs
+# We use 16 x 6 = 96 V100-32GB GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
 # salloc --nodes 16 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/tgrt_question_generate_65b_base.sh
 # We use the deduplicated topics from epoch 5 of TGRT topic brainstorming to generate topic-guided questions.

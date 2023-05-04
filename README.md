@@ -20,3 +20,15 @@
 <img src="assets/images/self_align_pipeline.png" alt="Dromedary Pipeline"/>
 
 </p>
+
+### Inference
+
+[Chatbot Demo](inference/README.md)
+
+### Training
+
+[Reproduction pipeline](training/README.md)
+
+### Prompts
+
+All the human annotations used in this project can be found [here](prompts).
