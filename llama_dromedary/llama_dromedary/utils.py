@@ -1,4 +1,4 @@
-"""Utilities for LLaMA Dromedary."""
+"""Utility functions for Dromedary."""
 from typing import Tuple, List, Dict, Optional
 import os
 import torch
