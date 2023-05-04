@@ -67,3 +67,20 @@ We provide the full [training pipeline](training/README.md) of Dromedary for rep
 ## Prompts
 
 All the human annotations used in this project can be found [here](prompts).
+
+### TODOs
+
+- [ ] Add the code for TruthfulQA and HHH Eval evaluation.
+- [ ] Fix the Huggingface datasets bug in the fine-tuning pipeline.
+- [ ] Release Dromedary delta weights at Huggingface model hub.
+
+### Citation
+
+Please cite the following paper if you use the data or code in this repo.
+
+TBD
+
+### Acknowledgements
+
+We thank Yizhong Wang for providing the code for the parse analysis plot.
+We also thank the Meta (LLaMA team)[https://github.com/facebookresearch/llama], (Standford Alpaca team)[https://github.com/tatsu-lab/stanford_alpaca], (Vicuna team)[https://github.com/lm-sys/FastChat], (Alpaca-LoRA)[https://github.com/tloen/alpaca-lora], and (Huggingface PEFT)[https://github.com/huggingface/peft] for their efforts in democratizing large language models.

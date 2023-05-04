@@ -1,6 +1,6 @@
 # We use 16 x 6 = 96 V100-32GB GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
-# salloc --nodes 8 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_dromedary_65b_final.sh
+# salloc --nodes 16 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_dromedary_65b_final.sh
 
 # Due to some unknown issues in HF datasets library, we recommend run `finetune.py`
 # with --fake_run flag to prepare the dataset on your local machine,
