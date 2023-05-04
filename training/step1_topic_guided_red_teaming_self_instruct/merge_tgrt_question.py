@@ -41,7 +41,7 @@ def main(
 
   random.shuffle(results)
   with open(output_file, "w") as f:
-    f.write(json.dumps(results, indent=2))
+    f.write(json.dumps(results))
 
 
 if __name__ == "__main__":

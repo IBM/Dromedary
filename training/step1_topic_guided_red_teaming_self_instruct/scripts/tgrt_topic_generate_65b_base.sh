@@ -1,3 +1,4 @@
+# We use 1 x 6 = 6 V100-32 GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
 # salloc --nodes 1 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/topic_generate_65b_base.sh
 # This script will grow the topic pool for 9 epochs

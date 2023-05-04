@@ -64,7 +64,7 @@ def main(
     print(f"kept {sub_keep} out of {sub_total} instructions")
 
   with open(output_file, "w") as f:
-    f.write(json.dumps(results, indent=2))
+    f.write(json.dumps(results))
   print(f"kept {keep} out of {instruction_data_len} instructions")
 
 
