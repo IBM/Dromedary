@@ -14,7 +14,7 @@ bash scripts/demo_dromedary_6shards.sh
 
 ## Further Customization
 
-Generally, since the Dromedary is a 65B model, it requires a minimum of 130GB GPU memory to accommodate the entirety of its model weights within the GPU memory.
+Generally, since Dromedary is a 65B model, it requires a minimum of 130GB GPU memory to accommodate the entirety of its model weights within the GPU memory.
 
 When using [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) on `MP = 1, 2, 4, 8` GPUs, you should divide the model to `MP` shards with `utils/convert_hf_weights_to_llama_ckpt.py`
 
