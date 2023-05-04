@@ -26,7 +26,7 @@ python -u utils/convert_hf_weights_to_llama_ckpt.py \
     --lora_r=16
 ```
 
-When using FSDP on `N = 3, 6, 12` GPUs, we recommend use `utils/convert_hf_weights_to_llama_expanded.py` to divide the checkpoint shards and use `llama_dromedary` for inference.
+When using FSDP on `N = 3, 6, 12` GPUs, we recommend use `utils/convert_hf_weights_to_llama_expanded.py` to divide the checkpoint shards and install our customized `llama_dromedary` package for inference.
 
 ```bash
 python -u utils/convert_hf_weights_to_llama_ckpt_expanded.py \
@@ -41,7 +41,7 @@ python -u utils/convert_hf_weights_to_llama_ckpt_expanded.py \
     --lora_r=16
 ```
 
-For `N = 5, 10` GPUs, here is the recommended expansion configuration,
+For `N = 5, 10` GPUs, here is the recommended expansion configuration for `llama_dromedary`.
 
 ```bash
 python -u utils/convert_hf_weights_to_llama_ckpt_expanded.py \

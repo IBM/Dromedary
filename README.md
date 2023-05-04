@@ -21,14 +21,38 @@
 
 </p>
 
-### Inference
+## Setup
 
-[Chatbot Demo](inference/README.md)
+To train your own self-aligned model with the LLaMA base language model, or to perform inference on GPUs with quantities differing from 1, 2, 4, or 8 (i.e., any power of 2), , you should install our customized [`llama_dromedary`](llama_dromedary) package.
 
-### Training
+In a conda env with pytorch / cuda available, run:
+```bash
+cd llama_dromedary
+pip install -r requirements.txt
+```
 
-[Reproduction pipeline](training/README.md)
+Then install the package in the same directory:
+```
+pip install -e .
+```
 
-### Prompts
+Otherwise, if you want to perform inference on 1, 2, 4, or 16 GPUs, you can use the original LLaMA repo.
+
+```bash
+git clone https://github.com/facebookresearch/llama.git
+cd llama
+pip install -r requirements.txt
+pip install -e .
+```
+
+## Inference
+
+We provide a [Chatbot Demo](inference/README.md).
+
+## Training
+
+We provide the full [training pipeline](training/README.md) for reproduction.
+
+## Prompts
 
 All the human annotations used in this project can be found [here](prompts).
