@@ -115,7 +115,7 @@ def main(
         raise ValueError("Unknown meta prompt file")
 
     if prompt_version == "dromedary":
-        generate_prompt = functools.partial(generate_prompt, meta_prompt=meta_prompt)
+        generate_prompt_fn = functools.partial(generate_prompt, meta_prompt=meta_prompt)
     else:
         raise ValueError("Unknown prompt version")
 
@@ -233,7 +233,7 @@ def main(
                 prompted_history.append("\n\n### Dromedary\n")
             prompted_history.append(history[i])
         prompted_history = "".join(prompted_history)
-        prompted_history = generate_prompt(prompted_history)
+        prompted_history = generate_prompt_fn(prompted_history)
         print("Prompt:")
         print(prompted_history)
 

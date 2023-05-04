@@ -170,7 +170,7 @@ def main(
     ],
     output_dir: str = None,
     total_ranks: int = 1,
-    write_mode: bool = False,
+    write_mode: bool = True,
     expanded_att_dim: int = 0,
     expanded_ffn_dim: int = 0,
     expanded_vocab_size: int = 0,

@@ -12,12 +12,39 @@ We use the instruction prompt for [Alpaca](https://github.com/tatsu-lab/stanford
 
 ```bash
 cd step1_topic_guided_red_teaming_self_instruct
-bash scripts/vanilla_self_instruct_65b_base.sh
+
+salloc --nodes 64 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/vanilla_self_instruct_65b_base.sh
+
+python merge_self_instruct.py \
+  --data_file_pattern "/path/to/your/llama65b_self_instruct_32shards_*.jsonl" \
+  --output_file "/path/to/your/llama65b_self_instruct_merged.json"
 ```
 
-### Topic-Guided Red-Teaming Self-Instruct
+### Topic-Guided Red-Teaming (TGRT) Self-Instruct
 
-We use our own instruction prompt for [topic brainstorming](../prompts/tgrt_self_instruct_topic_brainstorm_prompt.txt)
+We use our own instruction prompt for [topic brainstorming](../prompts/tgrt_self_instruct_topic_brainstorm_prompt.txt) and [topic-guided instruction generation](../prompts/tgrt_self_instruct_question_generation_prompt.txt). We also create our own [seed tasks](../prompts/tgrt_self_instruct_seed_questions.jsonl).
+
+```bash
+cd step1_topic_guided_red_teaming_self_instruct
+
+# Topic generation
+salloc --nodes 1 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/topic_generate_65b_base.sh
+python deduplicate_tgrt_topic.py \
+  --data_file /path/to/your/tgrt_topics.jsonl \
+  --output_file /path/to/your/tgrt_topics_deduplicated.jsonl
+
+# Topic-guided instruction generation
+salloc --nodes 16 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/tgrt_question_generate_65b_base.sh
+python merge_tgrt_question.py \
+  --data_file_pattern "/path/to/your/llama65b_tgrt_questions_8shards_*.jsonl" \
+  --output_file /path/to/your/llama65b_tgrt_questions_merged.json
+
+# Finally, we merge the synthetic instructions from Self-Instruct and TGRT Self-Instruct
+python merge_all_synthetic_inputs.py \
+  --data_file_1 "/path/to/your/llama65b_tgrt_questions_merged.json" \
+  --data_file_2 "/path/to/your/llama65b_self_instruct_merged.json" \
+  --output_file /path/to/your/llama65b_all_synthetic_inputs_merged.json
+```
 
 ## Stage 2: Principle-Driven Self-Alignment
 

@@ -13,8 +13,8 @@ from typing import List, Dict, Optional
 import torch
 import queue
 
-from llama.tokenizer import Tokenizer
-from llama.model import Transformer
+from llama_dromedary.tokenizer import Tokenizer
+from llama_dromedary.model import Transformer
 from collections import defaultdict
 
 

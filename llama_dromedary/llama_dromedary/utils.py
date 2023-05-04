@@ -10,9 +10,9 @@ from pathlib import Path
 from fairscale.nn.model_parallel import initialize as mpu
 from fairscale.nn.model_parallel.initialize import initialize_model_parallel
 
-from .generation import LLaMA
-from .model import ModelArgs, Transformer
-from .tokenizer import Tokenizer
+from llama_dromedary.generation import LLaMA
+from llama_dromedary.model import ModelArgs, Transformer
+from llama_dromedary.tokenizer import Tokenizer
 
 
 def setup_model_parallel() -> Tuple[int, int]:
