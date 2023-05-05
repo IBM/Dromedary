@@ -6,10 +6,10 @@ set -e
 set -x
 
 export PYTHONPATH="$PWD:$PYTHONPATH"
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 export MODEL_DIR="/gpfs/u/home/AICD/AICDsnzh/scratch/outputs"
-export OMP_NUM_THREADS=6
-export GPUS_PER_NODE=6
+export OMP_NUM_THREADS=8
+export GPUS_PER_NODE=8
 export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n 1)
 export MASTER_PORT=9901
 export TOTAL_NUM_GPUS=$(( $SLURM_NNODES * $GPUS_PER_NODE ))
