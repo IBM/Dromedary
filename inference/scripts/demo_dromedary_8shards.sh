@@ -1,6 +1,6 @@
 # We use 8 V100-32 GPUs
 # On AiMOS cluster [https://docs.cci.rpi.edu/clusters/DCS_Supercomputer/]
-# salloc --nodes 1 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/demo_dromedary_6shards.sh
+# salloc --nodes 1 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/demo_dromedary_8shards.sh
 
 set -e
 set -x
