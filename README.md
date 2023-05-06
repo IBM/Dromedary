@@ -15,6 +15,10 @@
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://github.com/tatsu-lab/stanford_alpaca/blob/main/LICENSE)
 [![Data License](https://img.shields.io/badge/Data%20License-CC%20By%20NC%204.0-red.svg)](https://github.com/tatsu-lab/stanford_alpaca/blob/main/DATA_LICENSE)
 
+## Introduction
+
+Dromedary is an open-source self-aligned language model trained with minimal human supervision.  For comprehensive details and insights, we kindly direct you to our [project page](https://mitibmdemos.draco.res.ibm.com/dromedary) and [paper](https://arxiv.org/abs/2305.03047).
+
 <p align="center">
 
 <img src="assets/images/self_align_pipeline.png" alt="Dromedary Pipeline"/>
@@ -54,7 +58,8 @@ pip install -r requirements.txt
 We release Dromedary weights as delta weights to comply with the LLaMA model license. You can add our delta to the original LLaMA weights to obtain the Dromedary weights. Instructions:
 
 1. Get the original LLaMA weights in the huggingface format by following the instructions [here](https://huggingface.co/docs/transformers/main/model_doc/llama).
-2. Follow our [inference guide](inference) to see how to deploy Dromedary/LLaMA on your own machine with [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) (which should be significantly faster than Huggingface's default pipeline parallel when using multiple GPUs).
+2. Download the LoRA delta weights from our Hugging Face [model hub](https://huggingface.co/zhiqings/dromedary-65b-lora-delta-v0).
+3. Follow our [inference guide](inference) to see how to deploy Dromedary/LLaMA on your own machine with [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) (which should be significantly faster than Huggingface's default pipeline parallel when using multiple GPUs).
 
 ## Inference
 
@@ -72,15 +77,25 @@ All the human annotations used in this project can be found [here](prompts).
 
 - [ ] Add the requirements.txt for the training pipeline.
 - [ ] Add the evaluation code for TruthfulQA and HHH Eval.
-- [ ] Release Dromedary delta weights at Huggingface model hub.
-- [ ] Add support for streaming inference for chatbot demo.
+- [x] Release Dromedary delta weights at Hugging Face model hub.
+- [ ] Release the synthetic training data of Dromedary.
+- [ ] Add support for streaming inference in the chatbot demo.
 - [ ] Fix the Huggingface datasets/accelerate bug of fine-tuning in distributed setting.
 
 ### Citation
 
 Please cite the following paper if you use the data or code in this repo.
 
-TBD
+```
+@misc{sun2023principledriven,
+      title={Principle-Driven Self-Alignment of Language Models from Scratch with Minimal Human Supervision}, 
+      author={Zhiqing Sun and Yikang Shen and Qinhong Zhou and Hongxin Zhang and Zhenfang Chen and David Cox and Yiming Yang and Chuang Gan},
+      year={2023},
+      eprint={2305.03047},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
 
 ### Acknowledgements
 
