@@ -132,7 +132,7 @@ class LLaMA:
                         if cur_pos > history_length + len(prompt_tokens[j]):
                             total_length = history_length + 1
                             history_token_seq = tuple([_ for _ in token_seq_freq[j] if len(_) == total_length])
-                            
+
                             if history_length == 0:
                                 history_token_freq = tuple([token_seq_freq[j][_] for _ in history_token_seq])
                                 history_token_seq = tuple([_[0] for _ in history_token_seq])
@@ -186,7 +186,7 @@ class LLaMA:
                 if cur_pos > stop_token_len_v2 + len(prompt_tokens[0]):
                     if torch.all(tokens[0, cur_pos - stop_token_len_v2 : cur_pos] == stop_tokens_v2):
                         break
-            
+
             if stream_queue is not None:
                 assert len(prompt_tokens) == 1 and tokens.shape[0] == 1
                 if cur_pos > len(prompt_tokens[0]):
@@ -213,7 +213,7 @@ class LLaMA:
             except ValueError:
                 pass
             decoded.append(self.tokenizer.decode(t))
-        
+
         if stream_queue is not None:
             stream_queue.put(None)
 

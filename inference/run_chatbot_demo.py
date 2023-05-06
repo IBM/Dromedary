@@ -3,15 +3,13 @@
 import functools
 from typing import Tuple
 import os
-import sys
-import numpy as np
-import torch
-import fire
 import time
 import json
-import gradio as gr
-
 from pathlib import Path
+
+import torch
+import fire
+import gradio as gr
 
 from fairscale.nn.model_parallel import initialize as mpu
 from fairscale.nn.model_parallel.initialize import initialize_model_parallel
@@ -300,7 +298,7 @@ def main(
             with gr.Column(scale=1.8):
                 with gr.Row():
                     with gr.Column(
-                        scale=1.5, 
+                        scale=1.5,
                     ):
                         chatbot = gr.Chatbot(
                             label="Chat History",
