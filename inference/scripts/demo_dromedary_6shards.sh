@@ -7,7 +7,7 @@ set -x
 
 export PYTHONPATH="$PWD:$PYTHONPATH"
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5
-export MODEL_DIR="/gpfs/u/home/AICD/AICDsnzh/scratch/outputs"
+export MODEL_DIR="/path/to/your/model/dir"
 export OMP_NUM_THREADS=6
 export GPUS_PER_NODE=6
 export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n 1)

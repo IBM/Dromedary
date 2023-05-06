@@ -79,7 +79,7 @@ All the human annotations used in this project can be found [here](prompts).
 - [ ] Add the evaluation code for TruthfulQA and HHH Eval.
 - [x] Release Dromedary delta weights at Hugging Face model hub.
 - [ ] Release the synthetic training data of Dromedary.
-- [ ] Add support for streaming inference in the chatbot demo.
+- [x] Add support for stream inference in the chatbot demo.
 - [ ] Fix the Huggingface datasets/accelerate bug of fine-tuning in distributed setting.
 
 ### Citation
@@ -88,7 +88,7 @@ Please cite the following paper if you use the data or code in this repo.
 
 ```
 @misc{sun2023principledriven,
-      title={Principle-Driven Self-Alignment of Language Models from Scratch with Minimal Human Supervision}, 
+      title={Principle-Driven Self-Alignment of Language Models from Scratch with Minimal Human Supervision},
       author={Zhiqing Sun and Yikang Shen and Qinhong Zhou and Hongxin Zhang and Zhenfang Chen and David Cox and Yiming Yang and Chuang Gan},
       year={2023},
       eprint={2305.03047},

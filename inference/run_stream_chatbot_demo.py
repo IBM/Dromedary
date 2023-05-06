@@ -3,15 +3,15 @@
 import functools
 from typing import Tuple
 import os
-import time
-import json
-from pathlib import Path
-
 import torch
 import fire
-import gradio as gr
+import time
+import json
+import threading
+import queue
+from pathlib import Path
 
-import torch.multiprocessing as mp
+import gradio as gr
 
 from fairscale.nn.model_parallel import initialize as mpu
 from fairscale.nn.model_parallel.initialize import initialize_model_parallel
@@ -163,16 +163,33 @@ def main(
 
         max_new_tokens_tensor = torch.tensor([max_new_tokens], dtype=torch.long, device="cuda")
         torch.distributed.broadcast(max_new_tokens_tensor, 0)
-        output = generator.generate(
-            [prompt],
-            max_gen_len=max_new_tokens_tensor[0],
-            temperature=temperature_tensor[0],
-            top_p=top_p_tensor[0],
-        )[0]
-        thought = ""
-        output = output.split("### User")[0].strip()
 
-        return thought, output
+        def generate_output(prompt, max_gen_len, temperature, top_p, quadtoken_frequency_penalty, stream_queue):
+            output = generator.generate(
+                [prompt],
+                max_gen_len=max_gen_len,
+                temperature=temperature,
+                top_p=top_p,
+                stop="### User",
+                quadtoken_frequency_penalty=quadtoken_frequency_penalty,
+                stream_queue=stream_queue,
+            )[0]
+
+        stream_queue = queue.Queue()
+        generate_thread = threading.Thread(target=generate_output, args=(
+            prompt, max_new_tokens_tensor[0], temperature_tensor[0], top_p_tensor[0], 1.0, stream_queue))
+        generate_thread.start()
+
+        while True:
+            words = stream_queue.get()
+            if words is None:
+                break
+            output = generator.tokenizer.decode(words[0])
+            output.split("### User")[0].strip()
+
+            if output.endswith("\n\n###") or output.endswith("\n\n##") or output.endswith("\n\n#"):
+                output = output.rsplit("\n\n", 1)[0]
+            yield output
 
     def run_fake_evaluate():
         while True:
@@ -210,23 +227,28 @@ def main(
                 max_gen_len=max_new_tokens_tensor[0],
                 temperature=temperature_tensor[0],
                 top_p=top_p_tensor[0],
+                stop="### User",
+                quadtoken_frequency_penalty=1.0,
             )[0]
 
     if global_rank != 0:
         run_fake_evaluate()
 
     def inference_chat(
-        text_input,
+        history,
+        chat,
         temperature,
         top_p,
         max_new_tokens,
-        history=[],
         history_length=10,
     ):
         if len(history) > history_length * 2:
             history = history[-history_length * 2:]
-        text_input = text_input.strip()
-        history.append(text_input)
+
+        if len(history) == 0:
+            print("No history, probably a heart beat.")
+            history = ["Hello", None]
+        del history[-1]
 
         # history should be prompted by "\n### User\n" and "\n### Watson\n" in an interleaved manner.
         prompted_history = []
@@ -241,26 +263,29 @@ def main(
         prompted_history = generate_prompt_fn(prompted_history)
         print("Prompt:")
         print(prompted_history)
+        history.append(None)
 
-        _, output = evaluate(
+        for output in evaluate(
             prompted_history,
             temperature=temperature,
             top_p=top_p,
             max_new_tokens=max_new_tokens,
-        )
-        history.append(output)
-
+        ):
+            history[-1] = output
+            chat = [
+                (history[i], history[i + 1]) for i in range(0, len(history) - 1, 2)
+            ]  # convert to tuples of list
+            yield [chat, history]
         print("Output:")
         print(output)
         print("="*20)
 
-        chat = [
-            (history[i], history[i + 1]) for i in range(0, len(history) - 1, 2)
-        ]  # convert to tuples of list
+    def user(user_message, history, chat):
+        new_user_message = ""
+        new_history = history + [user_message, None]
+        new_chat = chat + [(user_message, None)]
+        return new_user_message, new_history, new_chat
 
-        return {chat_input: "", chatbot: chat, state: history}
-
-    enable_queue = False
     # run the demo
     with gr.Blocks(
         css="""
@@ -278,7 +303,7 @@ def main(
                 temperature = gr.Slider(
                     minimum=0.0,
                     maximum=2.0,
-                    value=0.1,
+                    value=0.5,
                     step=0.1,
                     interactive=True,
                     label="Temperature",
@@ -287,7 +312,7 @@ def main(
                 top_p = gr.Slider(
                     minimum=0.0,
                     maximum=1.0,
-                    value=0.75,
+                    value=0.9,
                     step=0.05,
                     interactive=True,
                     label="Top p",
@@ -296,7 +321,7 @@ def main(
                 max_new_tokens = gr.Slider(
                     minimum=16,
                     maximum=512,
-                    value=128,
+                    value=384,
                     step=1,
                     interactive=True,
                     label="Max new tokens",
@@ -319,9 +344,9 @@ def main(
                         with gr.Row():
                             clear_button = gr.Button(value="Clear", interactive=True)
                             clear_button.click(
-                                lambda: ("", [], []),
-                                [],
-                                [chat_input, chatbot, state],
+                                lambda: ([], []),
+                                None,
+                                [chatbot, state],
                                 queue=False,
                             )
 
@@ -329,18 +354,29 @@ def main(
                                 value="Submit", interactive=True, variant="primary",
                             )
                             submit_button.click(
-                                inference_chat,
+                                user,
                                 [
                                     chat_input,
+                                    state,
+                                    chatbot,
+                                ],
+                                [
+                                    chat_input,
+                                    state,
+                                    chatbot
+                                ],
+                                queue=True,
+                                api_name="predict",
+                            ).then(
+                                inference_chat,
+                                [
+                                    state,
+                                    chatbot,
                                     temperature,
                                     top_p,
                                     max_new_tokens,
-                                    state,
                                 ],
-                                [chat_input, chatbot, state],
-                                show_progress=True,
-                                queue=enable_queue,
-                                api_name="predict",
+                                [chatbot, state],
                             )
 
         examples = [
@@ -356,11 +392,8 @@ def main(
             inputs=[chat_input],
         )
 
-    if enable_queue:
-        iface.queue(concurrency_count=1, api_open=False, max_size=10)
-        app, _, _ = iface.launch(share=True)
-    else:
-        app, _, _ = iface.launch(share=True, max_threads=1, enable_queue=False)
+    iface.queue(concurrency_count=1, api_open=False, max_size=10)
+    app, _, _ = iface.launch()
 
 
 def generate_prompt(instruction, input=None, meta_prompt=""):
