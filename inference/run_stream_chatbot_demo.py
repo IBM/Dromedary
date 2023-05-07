@@ -164,20 +164,20 @@ def main(
         max_new_tokens_tensor = torch.tensor([max_new_tokens], dtype=torch.long, device="cuda")
         torch.distributed.broadcast(max_new_tokens_tensor, 0)
 
-        def generate_output(prompt, max_gen_len, temperature, top_p, quadtoken_frequency_penalty, stream_queue):
+        def generate_output(prompt, max_gen_len, temperature, top_p, stream_queue):
             output = generator.generate(
                 [prompt],
                 max_gen_len=max_gen_len,
                 temperature=temperature,
                 top_p=top_p,
                 stop="### User",
-                quadtoken_frequency_penalty=quadtoken_frequency_penalty,
+                unitoken_frequency_penalty=0.3,
                 stream_queue=stream_queue,
             )[0]
 
         stream_queue = queue.Queue()
         generate_thread = threading.Thread(target=generate_output, args=(
-            prompt, max_new_tokens_tensor[0], temperature_tensor[0], top_p_tensor[0], 1.0, stream_queue))
+            prompt, max_new_tokens_tensor[0], temperature_tensor[0], top_p_tensor[0], stream_queue))
         generate_thread.start()
 
         while True:
@@ -228,7 +228,7 @@ def main(
                 temperature=temperature_tensor[0],
                 top_p=top_p_tensor[0],
                 stop="### User",
-                quadtoken_frequency_penalty=1.0,
+                unitoken_frequency_penalty=0.3,
             )[0]
 
     if global_rank != 0:

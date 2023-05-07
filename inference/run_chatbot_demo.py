@@ -169,6 +169,7 @@ def main(
             temperature=temperature_tensor[0],
             top_p=top_p_tensor[0],
             stop="### User",
+            unitoken_frequency_penalty=0.3,
         )[0]
         thought = ""
         output = output.split("### User")[0].strip()
@@ -213,6 +214,7 @@ def main(
                 temperature=temperature_tensor[0],
                 top_p=top_p_tensor[0],
                 stop="### User",
+                unitoken_frequency_penalty=0.3,
             )[0]
 
     if global_rank != 0:
