@@ -188,7 +188,7 @@ def main(
             output.split("### User")[0].strip()
 
             if output.endswith("\n\n###") or output.endswith("\n\n##") or output.endswith("\n\n#"):
-                output = output.rsplit("\n\n", 1)[0]
+                output = output.rsplit("\n\n", 1)[0].strip()
             yield output
 
     def run_fake_evaluate():
@@ -281,9 +281,12 @@ def main(
         print("="*20)
 
     def user(user_message, history, chat):
+        del chat
         new_user_message = ""
         new_history = history + [user_message, None]
-        new_chat = chat + [(user_message, None)]
+        new_chat = [
+            (history[i], history[i + 1]) for i in range(0, len(history) - 1, 2)
+        ]
         return new_user_message, new_history, new_chat
 
     # run the demo
@@ -393,7 +396,7 @@ def main(
         )
 
     iface.queue(concurrency_count=1, api_open=False, max_size=10)
-    app, _, _ = iface.launch()
+    app, _, _ = iface.launch(share=True)
 
 
 def generate_prompt(instruction, input=None, meta_prompt=""):

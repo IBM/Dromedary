@@ -168,10 +168,12 @@ def main(
             max_gen_len=max_new_tokens_tensor[0],
             temperature=temperature_tensor[0],
             top_p=top_p_tensor[0],
+            stop="### User",
         )[0]
         thought = ""
         output = output.split("### User")[0].strip()
-
+        if output.endswith("\n\n###") or output.endswith("\n\n##") or output.endswith("\n\n#"):
+            output = output.rsplit("\n\n", 1)[0].strip()
         return thought, output
 
     def run_fake_evaluate():
@@ -210,6 +212,7 @@ def main(
                 max_gen_len=max_new_tokens_tensor[0],
                 temperature=temperature_tensor[0],
                 top_p=top_p_tensor[0],
+                stop="### User",
             )[0]
 
     if global_rank != 0:
