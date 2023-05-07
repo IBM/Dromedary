@@ -9,7 +9,7 @@
 # c[j] is how often that token was sampled prior to the current position
 
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 import torch
 import queue
 
@@ -37,7 +37,7 @@ class LLaMA:
         bitoken_frequency_penalty: float = 0.0,
         tritoken_frequency_penalty: float = 0.0,
         quadtoken_frequency_penalty: float = 0.0,
-        frequency_penalty_white_list_range: int = 1024,
+        frequency_penalty_range: Tuple[int] = (1024, 29870),
         stream_queue: Optional[queue.Queue] = None,
     ) -> List[str]:
         bsz = len(prompts)
@@ -145,8 +145,10 @@ class LLaMA:
                                 history_token_seq = tuple([_[-1] for _ in history_token_seq if _[:-1] == history_prefix])
 
                             if len(history_token_seq) > 0:
+                                range_start = frequency_penalty_range[0]
+                                range_end = frequency_penalty_range[1]
                                 history_token_freq = tuple([
-                                    freq if token >= frequency_penalty_white_list_range else 0
+                                    freq if range_start <= token <= range_end else 0
                                     for freq, token in zip(history_token_freq, history_token_seq)
                                 ])
                                 history_token_seq = torch.tensor(history_token_seq).long().cuda()
