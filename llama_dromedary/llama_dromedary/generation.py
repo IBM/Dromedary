@@ -37,6 +37,7 @@ class LLaMA:
         bitoken_frequency_penalty: float = 0.0,
         tritoken_frequency_penalty: float = 0.0,
         quadtoken_frequency_penalty: float = 0.0,
+        frequency_penalty_white_list_range: int = 1024,
         stream_queue: Optional[queue.Queue] = None,
     ) -> List[str]:
         bsz = len(prompts)
@@ -144,7 +145,8 @@ class LLaMA:
                                 history_token_seq = tuple([_[-1] for _ in history_token_seq if _[:-1] == history_prefix])
 
                             if len(history_token_seq) > 0:
-                                # print("Frequency penalty: ", history_token_seq, history_token_freq)
+                                if history_token_seq[-1] < frequency_penalty_white_list_range:
+                                    continue
                                 history_token_seq = torch.tensor(history_token_seq).long().cuda()
                                 history_token_freq = torch.tensor(history_token_freq).long().cuda()
                                 logits = logits.clone()
