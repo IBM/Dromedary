@@ -306,9 +306,10 @@ class LLaMA:
 
     def get_frequency_penalty_set(self):
         starting_pieces = []
+        sp_model = self.tokenizer.sp_model
 
-        for i in range(self.tokenizer.GetPieceSize()):
-            if self.tokenizer.IdToPiece(i).startswith("▁") and not self.tokenizer.IdToPiece(i).endswith("▁"):
+        for i in range(sp_model.GetPieceSize()):
+            if sp_model.IdToPiece(i).startswith("▁") and not sp_model.IdToPiece(i).endswith("▁"):
                 starting_pieces.append(i)
 
         starting_pieces = set(starting_pieces)
