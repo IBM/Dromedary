@@ -40,6 +40,7 @@ class LLaMA:
         quadtoken_frequency_penalty: float = 0.0,
         stream_queue: Optional[queue.Queue] = None,
         frequency_penalty_starts_only: bool = True,
+        frequency_penalty_min_range: int = 1024,
     ) -> List[str]:
         bsz = len(prompts)
         params = self.model.params
@@ -152,7 +153,7 @@ class LLaMA:
                                 history_token_freq = tuple([
                                     freq if (
                                         not frequency_penalty_starts_only or
-                                        token in self.starting_pieces
+                                        (token in self.starting_pieces and token > frequency_penalty_min_range)
                                     ) else 0 for freq, token in zip(history_token_freq, history_token_seq)
                                 ])
                                 history_token_seq = torch.tensor(history_token_seq).long().cuda()
