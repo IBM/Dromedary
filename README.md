@@ -17,7 +17,7 @@
 
 ## Introduction
 
-Dromedary is an open-source self-aligned language model trained with minimal human supervision.  For comprehensive details and insights, we kindly direct you to our [project page](https://mitibmdemos.draco.res.ibm.com/dromedary) and [paper](https://arxiv.org/abs/2305.03047).
+Dromedary is an open-source self-aligned language model trained with minimal human supervision.  For comprehensive details and insights, we kindly direct you to our [project page](https://github.com/IBM/Dromedary) and [paper](https://arxiv.org/abs/2305.03047).
 
 <p align="center">
 
