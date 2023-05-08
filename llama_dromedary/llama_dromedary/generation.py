@@ -22,6 +22,7 @@ class LLaMA:
     def __init__(self, model: Transformer, tokenizer: Tokenizer):
         self.model = model
         self.tokenizer = tokenizer
+        self.starting_pieces = None
 
     def generate(
         self,
@@ -37,8 +38,8 @@ class LLaMA:
         bitoken_frequency_penalty: float = 0.0,
         tritoken_frequency_penalty: float = 0.0,
         quadtoken_frequency_penalty: float = 0.0,
-        frequency_penalty_range: Tuple[int] = (1024, 29870),
         stream_queue: Optional[queue.Queue] = None,
+        frequency_penalty_starts_only: bool = True,
     ) -> List[str]:
         bsz = len(prompts)
         params = self.model.params
@@ -56,6 +57,9 @@ class LLaMA:
 
         if stream_queue is not None:
             assert bsz == 1, "stream is only supported for single prompt generation"
+
+        if frequency_penalty_starts_only and self.starting_pieces is None:
+            self.starting_pieces = self.get_frequency_penalty_set()
 
         token_seq_freq = [defaultdict(int) for _ in range(bsz)]
 
@@ -145,11 +149,11 @@ class LLaMA:
                                 history_token_seq = tuple([_[-1] for _ in history_token_seq if _[:-1] == history_prefix])
 
                             if len(history_token_seq) > 0:
-                                range_start = frequency_penalty_range[0]
-                                range_end = frequency_penalty_range[1]
                                 history_token_freq = tuple([
-                                    freq if range_start <= token <= range_end else 0
-                                    for freq, token in zip(history_token_freq, history_token_seq)
+                                    freq if (
+                                        not frequency_penalty_starts_only or
+                                        token in self.starting_pieces
+                                    ) else 0 for freq, token in zip(history_token_freq, history_token_seq)
                                 ])
                                 history_token_seq = torch.tensor(history_token_seq).long().cuda()
                                 history_token_freq = torch.tensor(history_token_freq).long().cuda()
@@ -299,6 +303,16 @@ class LLaMA:
             log_probs = torch.log(all_probs[i, log_probs_start: log_probs_end, target_indices])
             target_log_probs.append(log_probs.sum().item())
         return target_log_probs
+
+    def get_frequency_penalty_set(self):
+        starting_pieces = []
+
+        for i in range(self.tokenizer.GetPieceSize()):
+            if self.tokenizer.IdToPiece(i).startswith("▁") and not self.tokenizer.IdToPiece(i).endswith("▁"):
+                starting_pieces.append(i)
+
+        starting_pieces = set(starting_pieces)
+        return starting_pieces
 
 
 def sample_top_p(probs, p):
