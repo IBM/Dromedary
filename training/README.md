@@ -1,8 +1,6 @@
 # Training Experiences
 
-The whole **SELF-ALIGN** process involves four distinct stages.
-
-In our [paper](https://arxiv.org/abs/2305.03047), we provide a detailed description of each of these stages. The prompt we used can be found [here](../prompts/verbose_dromedary_prompt.txt).
+The whole **SELF-ALIGN** process involves four distinct stages. In our [paper](https://arxiv.org/abs/2305.03047), we provide a detailed description of each of these stages.
 
 ## Prerequisites
 
@@ -99,7 +97,7 @@ salloc --nodes 8 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_drom
 
 ## Stage 4: Verbose Cloning
 
-Finally, the fourth stage, **Verbose Cloning**, serves as a complementary step to address challenges arising from overly-brief or indirect responses by refining the model to produce detailed and comprehensive answers to user queries.
+Finally, the fourth stage, **Verbose Cloning**, serves as a complementary step to address challenges arising from overly-brief or indirect responses by refining the model to produce detailed and comprehensive answers to user queries. The prompt we used can be found [here](../prompts/verbose_dromedary_prompt.txt).
 
 <details>
 <summary> <strong> Running the code </strong> </summary>
