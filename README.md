@@ -57,9 +57,9 @@ pip install -r requirements.txt
 
 We release Dromedary weights as delta weights to comply with the LLaMA model license. You can add our delta to the original LLaMA weights to obtain the Dromedary weights. Instructions:
 
-1. Get the original LLaMA weights in the huggingface format by following the instructions [here](https://huggingface.co/docs/transformers/main/model_doc/llama).
+1. Get the original LLaMA weights in the Hugging Face format by following the instructions [here](https://huggingface.co/docs/transformers/main/model_doc/llama).
 2. Download the LoRA delta weights from our Hugging Face [model hub](https://huggingface.co/zhiqings/dromedary-65b-lora-delta-v0).
-3. Follow our [inference guide](inference) to see how to deploy Dromedary/LLaMA on your own machine with [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) (which should be significantly faster than Huggingface's default pipeline parallel when using multiple GPUs).
+3. Follow our [inference guide](inference) to see how to deploy Dromedary/LLaMA on your own machine with [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) (which should be significantly faster than Hugging Face's default pipeline parallel when using multiple GPUs).
 
 ## Inference
 
@@ -81,7 +81,7 @@ All the human annotations used in this project can be found [here](prompts).
 - [ ] Add support for Hugging Face native pipeline in the released model hub.
 - [ ] Release the synthetic training data of Dromedary.
 - [x] Add support for stream inference in the chatbot demo.
-- [ ] Fix the Huggingface datasets/accelerate bug of fine-tuning in distributed setting.
+- [ ] Fix the Hugging Face datasets/accelerate bug of fine-tuning in distributed setting.
 
 ### Citation
 
@@ -101,4 +101,4 @@ Please cite the following paper if you use the data or code in this repo.
 ### Acknowledgements
 
 We thank Yizhong Wang for providing the code for the parse analysis plot.
-We also thank [Meta LLaMA team](https://github.com/facebookresearch/llama), [Standford Alpaca team](https://github.com/tatsu-lab/stanford_alpaca), [Vicuna team](https://github.com/lm-sys/FastChat), [Alpaca-LoRA](https://github.com/tloen/alpaca-lora), and [Huggingface PEFT](https://github.com/huggingface/peft) for their open-source efforts in democratizing large language models.
+We also thank [Meta LLaMA team](https://github.com/facebookresearch/llama), [Standford Alpaca team](https://github.com/tatsu-lab/stanford_alpaca), [Vicuna team](https://github.com/lm-sys/FastChat), [Alpaca-LoRA](https://github.com/tloen/alpaca-lora), and [Hugging Face PEFT](https://github.com/huggingface/peft) for their open-source efforts in democratizing large language models.
