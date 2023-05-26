@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Follow our [inference guide](inference) to see how to deploy Dromedary/LLaMA on your own machine with [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) (which should be significantly faster than Hugging Face's default pipeline parallel when using multiple GPUs).
+Follow our [inference guide](https://github.com/IBM/Dromedary/tree/main/inference) to see how to deploy Dromedary/LLaMA on your own machine with [model parallel](https://github.com/facebookresearch/fairscale/tree/main/fairscale/nn/model_parallel) (which should be significantly faster than Hugging Face's default pipeline parallel when using multiple GPUs).
 
 Generally, since Dromedary is a 65B model, it requires a minimum of 130GB GPU memory to accommodate the entirety of its model weights within the GPU memory.
 
