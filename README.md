@@ -81,13 +81,12 @@ All the human annotations used in this project can be found [here](prompts).
 
 ### TODOs
 
-- [ ] Add the requirements.txt for the training pipeline.
-- [ ] Add the evaluation code for TruthfulQA and HHH Eval.
+- [x] Add the evaluation code for TruthfulQA and HHH Eval.
 - [x] Release Dromedary delta weights at Hugging Face model hub.
-- [ ] Add support for Hugging Face native pipeline in the released model hub.
 - [x] Release the synthetic training data of Dromedary.
 - [x] Add support for stream inference in the chatbot demo.
-- [ ] Fix the Hugging Face datasets/accelerate bug of fine-tuning in distributed setting.
+- [ ] Add the `requirements.txt` for the training pipeline.
+- [ ] Add support for Hugging Face native pipeline in the released model hub.
 
 ### Citation
 
