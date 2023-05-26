@@ -9,6 +9,10 @@ Generally, since Dromedary is a 65B model, it requires a minimum of 130GB GPU me
 ## HHH Eval
 
 ```bash
+git clone git@github.com:google/BIG-bench.git /your/path/to/bigbench/repo
+```
+
+```bash
 #!/bin/bash
 set -e
 set -x
@@ -23,6 +27,7 @@ export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n $((SY
 export MASTER_PORT=9901
 
 CKPT_NAME=/your/sharded_ckpt
+BIG_BENCH_HOME=/your/path/to/bigbench/repo
 
 torchrun --nproc_per_node $GPUS_PER_NODE \
   --nnodes $NUM_NODES \
@@ -32,6 +37,7 @@ torchrun --nproc_per_node $GPUS_PER_NODE \
   evaluate_hhh_eval.py \
   --ckpt_dir $OUTPUT_DIR/$CKPT_NAME \
   --tokenizer_path $OUTPUT_DIR/tokenizer.model \
+  --big_bench_home $BIG_BENCH_HOME \
   --max_seq_len 1536 \
   --max_shared_seq_len 512 \
   --max_batch_size 4 \
