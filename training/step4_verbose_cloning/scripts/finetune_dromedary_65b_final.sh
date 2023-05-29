@@ -52,7 +52,7 @@ accelerate launch \
     --checkpointing_steps $CKPT_STEPS \
     --resume_from_checkpoint True \
     --data_path "$DATA_DIR/llama65b_verbose_clone_merged.json" \
-    --meta_prompt_pattern "../prompts/dromedary_*prompt_distill.txt" \
+    --meta_prompt_pattern "../prompts/inference_prompts/dromedary_*prompt_distill.txt" \
     --add_eos_token False \
     --cutoff_len 768 \
     --train_on_inputs False \
