@@ -189,7 +189,7 @@ def train(
     tokenizer.pad_token_id = (
         0  # unk. we want this to be different from the eos token
     )
-    tokenizer.padding_side = "left"  # Allow batched inference
+    tokenizer.padding_side = "right"  # Allow batched inference
 
     def tokenize(prompt, add_eos_token):
         # there's probably a way to do this with the tokenizer settings
