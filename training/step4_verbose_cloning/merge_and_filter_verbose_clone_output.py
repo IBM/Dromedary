@@ -17,13 +17,13 @@ import fire
 
 
 def dedup(line_output):
-  pattern = r'(?<=[\n.?!;:,])'
+  pattern = r'(?<=[\n.?!;:,`])'
   # Split the string using the pattern
   line_output = re.split(pattern, line_output)
 
   filtered_line_output = []
   for splitted_line in line_output:
-    if splitted_line not in filtered_line_output or splitted_line == '' or splitted_line in '\n.?!;:,':
+    if splitted_line not in filtered_line_output or splitted_line == '' or splitted_line in '\n.?!;:,`':
       filtered_line_output.append(splitted_line)
     else:
       break
