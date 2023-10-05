@@ -1,14 +1,13 @@
 """Self-aligned response generation."""
 import math
 import os
-import sys
 import fire
 import time
 import tqdm
 import json
 
 from pathlib import Path
-from llama_dromedary.utils import setup_model_parallel, sync_model_parallel, load_model, llama_completion
+from llama_dromedary import Llama
 
 
 def main(
@@ -25,14 +24,12 @@ def main(
     input_file: str = None,
     output_file: str = None,
     meta_prompt_file: str = None,
-    unitoken_frequency_penalty: float = 0.0,
-    bitoken_frequency_penalty: float = 0.0,
-    tritoken_frequency_penalty: float = 0.0,
-    quadtoken_frequency_penalty: float = 0.0,
 ):
     assert group_rank >= 0, "Must specify group rank"
     assert group_size >= 0, "Must specify group size"
-    assert input_file is not None and output_file is not None, "Must specify input and output files"
+    assert (
+        input_file is not None and output_file is not None
+    ), "Must specify input and output files"
     assert meta_prompt_file is not None, "Must specify meta prompt file"
 
     with open(input_file, "r") as f:
@@ -41,81 +38,82 @@ def main(
 
     generate_prompt_fn = generate_prompt
     with open(meta_prompt_file, "r") as f:
-        data = f.readlines()
-    meta_prompt = "".join(data)
-    meta_prompt = meta_prompt.strip()
+        meta_prompt = f.read().strip()
 
-    global_rank, world_size = setup_model_parallel()
-    if global_rank > 0:
-        sys.stdout = open(os.devnull, "w")
-
-    t0 = time.time()
-    generator = load_model(
-        ckpt_dir, tokenizer_path, global_rank, world_size, max_seq_len, max_batch_size, max_shared_seq_len,
+    generator = Llama.build(
+        ckpt_dir=ckpt_dir,
+        tokenizer_path=tokenizer_path,
+        max_seq_len=max_seq_len,
+        max_batch_size=max_batch_size,
+        max_shared_seq_len=max_shared_seq_len,
     )
-    t1 = time.time()
-    loading_time = t1-t0
-    print("Model loading time on %d: " % group_size, loading_time)
 
     results = []
     # record current progress
+    if "shards" not in output_file and group_size > 1:
+        output_file = output_file.replace(
+            ".json", f"_{group_size}shards_{group_rank}.json"
+        )
+
     if Path(output_file).exists():
         with open(output_file, "r") as f:
             results = f.readlines()
             results = [line for line in results if len(line.strip()) > 0]
 
-    inputs = inputs[len(results):]
+    inputs = inputs[len(results) :]
     print("Skipping %d examples" % len(results))
 
-    batching_inputs = tqdm.tqdm(BatchIterator(inputs, max_batch_size), desc="Batched inference", disable=global_rank > 0)
+    global_rank = int(os.environ.get("RANK", "0"))
+    batching_inputs = tqdm.tqdm(
+        BatchIterator(inputs, max_batch_size),
+        desc="Batched inference",
+        disable=global_rank > 0,
+    )
     total_iters = len(inputs) // max_batch_size
 
     output_handler = None
     if global_rank == 0:
         output_handler = open(output_file, "a")
 
-    sync_model_parallel()
-
-    logit_bias = {
-        generator.tokenizer.encode("Sorry", bos=False, eos=False)[0]: -100,
-    }
-    print("logit_bias: ", logit_bias)
-
     # prepare inputs with batch size $max_batch_size
     for iter, batched_inputs in enumerate(batching_inputs):
         t0 = time.time()
-        prompts = [generate_prompt_fn(meta_prompt, ex_input["instruction"], ex_input["input"])
-                          for ex_input in batched_inputs]
+        prompts = [
+            generate_prompt_fn(
+                meta_prompt, ex_input["instruction"].strip(), ex_input["input"].strip()
+            )
+            for ex_input in batched_inputs
+        ]
 
-        outputs = llama_completion(
-            generator,
+        outputs = generator.text_completion(
             prompts,
-            max_tokens=generate_max_len,
+            max_gen_len=generate_max_len,
             temperature=temperature,
             top_p=top_p,
-            logit_bias=logit_bias,
-            unitoken_frequency_penalty=unitoken_frequency_penalty,
-            bitoken_frequency_penalty=bitoken_frequency_penalty,
-            tritoken_frequency_penalty=tritoken_frequency_penalty,
-            quadtoken_frequency_penalty=quadtoken_frequency_penalty,
         )
 
         t1 = time.time()
 
         results = []
         for ex_input, output in zip(batched_inputs, outputs):
-            results.append({"instruction": ex_input["instruction"], "input": ex_input["input"], "output": output})
+            results.append(
+                {
+                    "instruction": ex_input["instruction"],
+                    "input": ex_input["input"],
+                    "output": output,
+                }
+            )
 
         if group_rank == 0:
             for ex_input, output, _ in zip(batched_inputs, outputs, range(8)):
-                print("=" * 20, "iter: ", iter, "/", total_iters, "latency: ", t1-t0)
+                print("=" * 20, "iter: ", iter, "/", total_iters, "latency: ", t1 - t0)
                 print(f"Input: {ex_input['instruction']}: {ex_input['input']}")
                 print(f"Output: {output}")
                 print()
 
         if output_handler is not None:
             for result in results:
-                output_handler.write("\n" + json.dumps(result))
+                output_handler.write(json.dumps(result) + "\n")
             output_handler.flush()
 
 
@@ -127,7 +125,7 @@ class BatchIterator:
 
     def __iter__(self):
         for i in range(0, len(self.data), self.batch_size):
-            yield self.data[i:i + self.batch_size]
+            yield self.data[i : i + self.batch_size]
 
     def __len__(self):
         return math.ceil(len(self.data) / self.batch_size)

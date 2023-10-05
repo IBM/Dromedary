@@ -31,16 +31,16 @@ torchrun --nproc_per_node $GPUS_PER_NODE \
   --master_addr $MASTER_ADDR \
   --master_port $MASTER_PORT \
   generate_self_align_response.py \
-  --ckpt_dir $MODEL_DIR/llama-65b-base-12shards \
+  --ckpt_dir $MODEL_DIR/llama-2-70b-12shard \
   --tokenizer_path $MODEL_DIR/tokenizer.model \
-  --generate_max_len 256 \
-  --max_seq_len 256 \
-  --max_shared_seq_len 1792 \
+  --generate_max_len 512 \
+  --max_seq_len 768 \
+  --max_shared_seq_len 2816 \
   --max_batch_size 64 \
   --group_rank $GROUP_RANK \
   --group_size $GROUP_SIZE \
-  --input_file "$DATA_DIR/llama65b_all_synthetic_inputs_merged.json" \
-  --output_file "$DATA_DIR/llama65b_self_align_${GROUP_SIZE}shards_${GROUP_RANK}.json" \
+  --input_file "$DATA_DIR/merged_prompts.json" \
+  --output_file "$DATA_DIR/llama2_70b_self_align_${GROUP_SIZE}shards_${GROUP_RANK}.json" \
   --meta_prompt_file "../../prompts/watson_self_align_prompt.txt" \
-  --temperature 0.5 \
+  --temperature 0.7 \
   --top_p 0.95

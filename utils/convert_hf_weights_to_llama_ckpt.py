@@ -95,13 +95,6 @@ def shard_weights(k, v, rank, total_ranks):
 def main(
     base_model: str = "",
     lora_weights: str = "none",
-    lora_r: int = 8,
-    lora_alpha: int = 16,
-    lora_dropout: float = 0.05,
-    lora_target_modules: List[str] = [
-        "q_proj",
-        "v_proj",
-    ],
     output_dir: str = None,
     total_ranks: int = 1,
     write_mode: bool = True,
@@ -117,47 +110,19 @@ def main(
         )
         lora_model = model
     else:
-        checkpoint_name = os.path.join(
-            lora_weights, "adapter_model.bin"
-        )
-        print(checkpoint_name)
-        adapters_weights = torch.load(checkpoint_name)
-
         model = LlamaForCausalLM.from_pretrained(
             base_model,
             torch_dtype=torch.float16,
             device_map={"": "cpu"},
         )
 
-        config = LoraConfig(
-            r=lora_r,
-            lora_alpha=lora_alpha,
-            target_modules=lora_target_modules,
-            lora_dropout=lora_dropout,
-            bias="none",
-            task_type="CAUSAL_LM",
+        lora_model = PeftModel.from_pretrained(
+            model,
+            lora_weights,
+            is_trainable=False,
         )
-        lora_model = get_peft_model(model, config)
-        tmp_lora_model = set_peft_model_state_dict(lora_model, adapters_weights)
-        if tmp_lora_model is not None:
-            lora_model = tmp_lora_model
 
-        # merge weights
-        for layer in lora_model.base_model.model.model.layers:
-            if "q_proj" in lora_target_modules:
-                layer.self_attn.q_proj.merge_weights = True
-            if "v_proj" in lora_target_modules:
-                layer.self_attn.v_proj.merge_weights = True
-            if "k_proj" in lora_target_modules:
-                layer.self_attn.k_proj.merge_weights = True
-            if "o_proj" in lora_target_modules:
-                layer.self_attn.o_proj.merge_weights = True
-            if "gate_proj" in lora_target_modules:
-                layer.mlp.gate_proj.merge_weights = True
-            if "down_proj" in lora_target_modules:
-                layer.mlp.down_proj.merge_weights = True
-            if "up_proj" in lora_target_modules:
-                layer.mlp.up_proj.merge_weights = True
+        lora_model = lora_model.merge_and_unload()
 
     lora_model.train(False)
 
@@ -173,15 +138,31 @@ def main(
         "norm_eps": model_config.rms_norm_eps,
         "vocab_size": -1,
     }
+
+    if model_config.num_key_value_heads != model_config.num_attention_heads:
+        params["n_kv_heads"] = model_config.num_key_value_heads
+
+    if int(4 * 2 * model_config.hidden_size / 3) != model_config.intermediate_size:
+        assert model_config.hidden_size == 8192
+        assert model_config.intermediate_size == 28672
+        params["ffn_dim_multiplier"] = 1.3
+        params["multiple_of"] = 4096
+
     n_heads = params["n_heads"]
+    real_n_kv_heads = model_config.num_key_value_heads
     dim = params["dim"]
 
+    if real_n_kv_heads is not None:
+        kv_multiplier = n_heads // real_n_kv_heads
+    else:
+        kv_multiplier = 1
+        real_n_kv_heads = n_heads
 
-    def unpermute(w):
+    def unpermute(w, n_heads_in):
         return (
-            w.view(n_heads, 2, dim // n_heads // 2, dim)
+            w.view(n_heads_in, 2, dim // n_heads // 2, dim)
             .transpose(1, 2)
-            .reshape(dim, dim)
+            .reshape(-1, dim)
         )
 
     os.makedirs(output_dir, exist_ok=False)
@@ -197,15 +178,17 @@ def main(
         for k, v in lora_model_sd.items():
             new_k = translate_state_dict_key(k)
             if new_k is not None:
-                if "wq" in new_k or "wk" in new_k:
-                    new_v = unpermute(v)
+                if "wq" in new_k:
+                    new_v = unpermute(v, n_heads)
+                elif "wk" in new_k:
+                    new_v = unpermute(v, real_n_kv_heads)
                 else:
                     new_v = v
 
                 new_v = shard_weights(new_k, new_v, rank, total_ranks)
                 if "layers" not in new_k or "layers.0" in new_k:
                     print(f"{new_k},", "shape:", new_v.shape, "dtype:", new_v.dtype)
-                
+
                 v_np = new_v.cpu().numpy()
                 new_v = torch.from_numpy(v_np.astype(np.float16))
 
@@ -214,12 +197,20 @@ def main(
 
         print(f"Total model params: {model_params_count}")
 
-        print(f"Estimated storage: {model_params_count * 2 / 1024 / 1024 / 1024:.2f} GB")
+        print(
+            f"Estimated storage: {model_params_count * 2 / 1024 / 1024 / 1024:.2f} GB"
+        )
         if write_mode:
-            print(f"Saving to: {os.path.join(output_dir, f'consolidated.{rank:02d}.pth')}")
-            torch.save(new_state_dict, os.path.join(output_dir, f"consolidated.{rank:02d}.pth"))
+            print(
+                f"Saving to: {os.path.join(output_dir, f'consolidated.{rank:02d}.pth')}"
+            )
+            torch.save(
+                new_state_dict, os.path.join(output_dir, f"consolidated.{rank:02d}.pth")
+            )
         else:
-            print(f"Debug: saving to: {os.path.join(output_dir, f'consolidated.{rank:02d}.pth')}")
+            print(
+                f"Debug: saving to: {os.path.join(output_dir, f'consolidated.{rank:02d}.pth')}"
+            )
 
 
 if __name__ == "__main__":
