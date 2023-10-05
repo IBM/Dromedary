@@ -100,13 +100,12 @@ All the human annotations used in this project can be found [here](prompts).
 Please cite the following paper if you use the data or code in this repo.
 
 ```
-@misc{sun2023principledriven,
-      title={Principle-Driven Self-Alignment of Language Models from Scratch with Minimal Human Supervision},
-      author={Zhiqing Sun and Yikang Shen and Qinhong Zhou and Hongxin Zhang and Zhenfang Chen and David Cox and Yiming Yang and Chuang Gan},
-      year={2023},
-      eprint={2305.03047},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@inproceedings{sun2023principle,
+      title = {Principle-Driven Self-Alignment of Language Models from Scratch with Minimal Human Supervision},
+      author = {Sun, Zhiqing and Shen, Yikang and Zhou, Qinhong and Zhang, Hongxin and Chen, Zhenfang and Cox, David and Yang, Yiming and Gan, Chuang},
+      booktitle = {Thirty-seventh Conference on Neural Information Processing Systems},
+      year = {2023},
+      url = {https://openreview.net/forum?id=p40XRfBX96},
 }
 ```
 
