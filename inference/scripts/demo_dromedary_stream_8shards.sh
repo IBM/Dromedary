@@ -12,7 +12,7 @@ export MASTER_PORT=9901
 export TOTAL_NUM_GPUS=$(( $SLURM_NNODES * $GPUS_PER_NODE ))
 
 N_SHARDS=8
-CKPT_NAME="dromedary-65b-lora-final"
+CKPT_NAME="dromedary-70b-qlora-merged-gqa"
 
 torchrun --nproc_per_node $GPUS_PER_NODE \
   --nnodes $SLURM_NNODES \
@@ -22,6 +22,6 @@ torchrun --nproc_per_node $GPUS_PER_NODE \
   run_stream_chatbot_demo.py \
   --ckpt_dir $MODEL_DIR/$CKPT_NAME-${N_SHARDS}shards \
   --tokenizer_path $MODEL_DIR/tokenizer.model \
-  --max_seq_len 2048 \
+  --max_seq_len 4096 \
   --max_batch_size 1 \
-  --meta_prompt_file "../prompts/inference_prompts/dromedary_verbose_prompt.txt"
+  --meta_prompt_file "../prompts/inference_prompts/dromedary_concise_prompt_distill.txt"

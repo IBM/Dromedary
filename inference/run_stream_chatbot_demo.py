@@ -13,87 +13,12 @@ from pathlib import Path
 
 import gradio as gr
 
-from fairscale.nn.model_parallel import initialize as mpu
-from fairscale.nn.model_parallel.initialize import initialize_model_parallel
-
-use_llama_dromedary = False
-try:
-    from llama_dromedary import ModelArgs, Transformer, Tokenizer, LLaMA
-    use_llama_dromedary = True
-except:
-    from llama import ModelArgs, Transformer, Tokenizer, LLaMA
+from llama_dromedary import Llama
 
 
-def setup_model_parallel() -> Tuple[int, int]:
-    local_rank = int(os.environ.get("LOCAL_RANK", -1))
-    global_rank = int(os.environ.get("RANK", -1))
-    world_size = int(os.environ.get("WORLD_SIZE", -1))
-
-    if world_size not in [1, 2, 4, 8, 16, 32] and not use_llama_dromedary:
-        raise ValueError(
-            "Only the following world sizes are supported: 1, 2, 4, 8, 16, 32 for the original llama code. "
-            "For llama_dromedary, any world size is supported."
-        )
-
-    torch.distributed.init_process_group("nccl")
-    initialize_model_parallel(world_size, pipeline_length=1)
-    print("Model parallelism:", mpu.get_model_parallel_world_size())
-    print("Global rank:", global_rank, "World size:", world_size)
-    torch.cuda.set_device(local_rank)
-
-    # seed must be the same in all processes
-    torch.manual_seed(1)
-    return global_rank, world_size
-
-
-def load(
-    ckpt_dir: str,
-    tokenizer_path: str,
-    global_rank: int,
-    world_size: int,
-    max_seq_len: int,
-    max_batch_size: int,
-    max_shared_seq_len: int,
-) -> LLaMA:
-    start_time = time.time()
-    checkpoints = sorted(Path(ckpt_dir).glob("*.pth"))
-    assert world_size == len(
-        checkpoints
-    ), f"Loading a checkpoint for MP={len(checkpoints)} but world size is {world_size}"
-    ckpt_path = checkpoints[global_rank]
-    print("Loading")
-    checkpoint = torch.load(ckpt_path, map_location="cpu")
-    with open(Path(ckpt_dir) / "params.json", "r") as f:
-        params = json.loads(f.read())
-
-    model_args: ModelArgs = ModelArgs(
-        max_seq_len=max_seq_len, max_batch_size=max_batch_size, **params
-    )
-    tokenizer = Tokenizer(model_path=tokenizer_path)
-
-    if use_llama_dromedary:
-      model_args.vocab_size = tokenizer.n_words
-      if model_args.qkv_dim != 0:
-          print("Original n_heads:", model_args.n_heads)
-          model_args.n_heads = (model_args.n_heads * model_args.qkv_dim) // model_args.dim
-          print("New n_heads:", model_args.n_heads)
-      model_args.max_shared_seq_len = max_shared_seq_len
-      model_args.use_prefix_cache = True
-
-    torch.set_default_tensor_type(torch.cuda.HalfTensor)
-    model = Transformer(model_args)
-    model.load_state_dict(checkpoint, strict=False)
-    model.eval()
-    model.half()
-
-    generator = LLaMA(model, tokenizer)
-    print(f"Loaded in {time.time() - start_time:.2f} seconds")
-    return generator
-
-
-title = """<h1 align="center">Dromedary (Self-Aligned LLaMa-65b)</h1>"""
+title = """<h1 align="center">Dromedary (Self-Aligned LLaMa-2-70b)</h1>"""
 description = """Gradio demo for Dromedary (Self-Align).
-<br> <strong>Meta Prompt</strong>: Consider an AI assistant whose codename is Dromedary, developed by the Self-Align team. Dromedary is trained on data up until Sept-2021, and it endeavors to be a helpful, ethical and reliable assistant.
+<br> <strong>Meta Prompt</strong>: Consider an AI assistant whose codename is Dromedary, developed by the Self-Align team. Dromedary is trained on data up until Sept-2022, and it endeavors to be a helpful, ethical and reliable assistant.
 <br> <strong>Disclaimer</strong>: This is a research prototype and is not intended for production use. No data is collected."""
 
 
@@ -119,15 +44,20 @@ def main(
     else:
         raise ValueError("Unknown prompt version")
 
-    global_rank, world_size = setup_model_parallel()
-
     t0 = time.time()
-    generator = load(
-        ckpt_dir, tokenizer_path, global_rank, world_size, max_seq_len, max_batch_size, max_shared_seq_len,
+    generator = Llama.build(
+        ckpt_dir=ckpt_dir,
+        tokenizer_path=tokenizer_path,
+        max_seq_len=max_seq_len,
+        max_batch_size=max_batch_size,
+        max_shared_seq_len=max_shared_seq_len,
     )
-    t1 = time.time()
-    loading_time = t1-t0
+
     global_rank = torch.distributed.get_rank()
+    world_size = torch.distributed.get_world_size()
+    t1 = time.time()
+
+    loading_time = t1 - t0
     print("Model loading time on %d: " % global_rank, loading_time)
 
     def evaluate(
@@ -144,9 +74,14 @@ def main(
                 torch.distributed.send(torch.tensor([1]), dst=i)
 
         # sync the prompt string across all processes, max_len=4096
-        prompt_tensor = torch.zeros(4096, dtype=torch.long, device="cuda") + generator.tokenizer.pad_id
+        prompt_tensor = (
+            torch.zeros(4096, dtype=torch.long, device="cuda")
+            + generator.tokenizer.pad_id
+        )
         tokenized_prompt = generator.tokenizer.encode(prompt, bos=True, eos=False)
-        prompt_tensor[:len(tokenized_prompt)] = torch.tensor(tokenized_prompt, dtype=torch.long, device="cuda")
+        prompt_tensor[: len(tokenized_prompt)] = torch.tensor(
+            tokenized_prompt, dtype=torch.long, device="cuda"
+        )
         torch.distributed.broadcast(prompt_tensor, 0)
         t = prompt_tensor.tolist()
         try:
@@ -155,13 +90,17 @@ def main(
             pass
         prompt = generator.tokenizer.decode(t)
 
-        temperature_tensor = torch.tensor([temperature], dtype=torch.float, device="cuda")
+        temperature_tensor = torch.tensor(
+            [temperature], dtype=torch.float, device="cuda"
+        )
         torch.distributed.broadcast(temperature_tensor, 0)
 
         top_p_tensor = torch.tensor([top_p], dtype=torch.float, device="cuda")
         torch.distributed.broadcast(top_p_tensor, 0)
 
-        max_new_tokens_tensor = torch.tensor([max_new_tokens], dtype=torch.long, device="cuda")
+        max_new_tokens_tensor = torch.tensor(
+            [max_new_tokens], dtype=torch.long, device="cuda"
+        )
         torch.distributed.broadcast(max_new_tokens_tensor, 0)
 
         def generate_output(prompt, max_gen_len, temperature, top_p, stream_queue):
@@ -171,13 +110,21 @@ def main(
                 temperature=temperature,
                 top_p=top_p,
                 stop="### User",
-                unitoken_frequency_penalty=0.3,
+                # unitoken_frequency_penalty=0.3,
                 stream_queue=stream_queue,
             )[0]
 
         stream_queue = queue.Queue()
-        generate_thread = threading.Thread(target=generate_output, args=(
-            prompt, max_new_tokens_tensor[0], temperature_tensor[0], top_p_tensor[0], stream_queue))
+        generate_thread = threading.Thread(
+            target=generate_output,
+            args=(
+                prompt,
+                max_new_tokens_tensor[0],
+                temperature_tensor[0],
+                top_p_tensor[0],
+                stream_queue,
+            ),
+        )
         generate_thread.start()
 
         while True:
@@ -186,8 +133,11 @@ def main(
                 break
             output = generator.tokenizer.decode(words[0])
             output.split("### User")[0].strip()
-
-            if output.endswith("\n\n###") or output.endswith("\n\n##") or output.endswith("\n\n#"):
+            if (
+                output.endswith("\n\n###")
+                or output.endswith("\n\n##")
+                or output.endswith("\n\n#")
+            ):
                 output = output.rsplit("\n\n", 1)[0].strip()
             yield output
 
@@ -201,9 +151,14 @@ def main(
             torch.distributed.recv(fake_tensor, src=0)
 
             # sync the prompt string across all processes
-            prompt_tensor = torch.zeros(4096, dtype=torch.long, device="cuda") + generator.tokenizer.pad_id
+            prompt_tensor = (
+                torch.zeros(4096, dtype=torch.long, device="cuda")
+                + generator.tokenizer.pad_id
+            )
             tokenized_prompt = generator.tokenizer.encode(prompt, bos=True, eos=False)
-            prompt_tensor[:len(tokenized_prompt)] = torch.tensor(tokenized_prompt, dtype=torch.long, device="cuda")
+            prompt_tensor[: len(tokenized_prompt)] = torch.tensor(
+                tokenized_prompt, dtype=torch.long, device="cuda"
+            )
             torch.distributed.broadcast(prompt_tensor, 0)
             t = prompt_tensor.tolist()
             try:
@@ -228,7 +183,6 @@ def main(
                 temperature=temperature_tensor[0],
                 top_p=top_p_tensor[0],
                 stop="### User",
-                unitoken_frequency_penalty=0.3,
             )[0]
 
     if global_rank != 0:
@@ -243,7 +197,7 @@ def main(
         history_length=10,
     ):
         if len(history) > history_length * 2:
-            history = history[-history_length * 2:]
+            history = history[-history_length * 2 :]
 
         if len(history) == 0:
             print("No history, probably a heart beat.")
@@ -278,15 +232,13 @@ def main(
             yield [chat, history]
         print("Output:")
         print(output)
-        print("="*20)
+        print("=" * 20)
 
     def user(user_message, history, chat):
         del chat
         new_user_message = ""
         new_history = history + [user_message, None]
-        new_chat = [
-            (history[i], history[i + 1]) for i in range(0, len(history) - 1, 2)
-        ]
+        new_chat = [(history[i], history[i + 1]) for i in range(0, len(history) - 1, 2)]
         return new_user_message, new_history, new_chat
 
     # run the demo
@@ -306,7 +258,7 @@ def main(
                 temperature = gr.Slider(
                     minimum=0.0,
                     maximum=2.0,
-                    value=0.5,
+                    value=0.7,
                     step=0.1,
                     interactive=True,
                     label="Temperature",
@@ -315,17 +267,17 @@ def main(
                 top_p = gr.Slider(
                     minimum=0.0,
                     maximum=1.0,
-                    value=0.9,
+                    value=0.95,
                     step=0.05,
                     interactive=True,
                     label="Top p",
                 )
 
                 max_new_tokens = gr.Slider(
-                    minimum=16,
-                    maximum=512,
+                    minimum=32,
+                    maximum=1024,
                     value=384,
-                    step=1,
+                    step=32,
                     interactive=True,
                     label="Max new tokens",
                 )
@@ -340,9 +292,7 @@ def main(
                         )
 
                     with gr.Column(scale=1):
-                        chat_input = gr.Textbox(
-                            lines=2,
-                            label="User Input")
+                        chat_input = gr.Textbox(lines=2, label="User Input")
 
                         with gr.Row():
                             clear_button = gr.Button(value="Clear", interactive=True)
@@ -354,7 +304,9 @@ def main(
                             )
 
                             submit_button = gr.Button(
-                                value="Submit", interactive=True, variant="primary",
+                                value="Submit",
+                                interactive=True,
+                                variant="primary",
                             )
                             submit_button.click(
                                 user,
@@ -363,11 +315,7 @@ def main(
                                     state,
                                     chatbot,
                                 ],
-                                [
-                                    chat_input,
-                                    state,
-                                    chatbot
-                                ],
+                                [chat_input, state, chatbot],
                                 queue=True,
                                 api_name="predict",
                             ).then(

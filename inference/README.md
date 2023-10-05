@@ -5,13 +5,13 @@
 Assuming you have 2 A100-80GB GPUs and have download and devide the Dromedary/LLaMA checkpoints into 2 shards.
 
 ```bash
-bash scripts/demo_dromedary_2shards.sh
+bash scripts/demo_dromedary_stream_2shards.sh
 ```
 
-Or assuming you have 6 V100-32GB GPUs and have download and devide the Dromedary/LLaMA checkpoints into 6 shards.
+Or assuming you have 8 V100-32GB GPUs and have download and devide the Dromedary/LLaMA checkpoints into 8 shards.
 
 ```bash
-bash scripts/demo_dromedary_6shards.sh
+bash scripts/demo_dromedary_stream_8shards.sh
 ```
 
 ## Further Customization
