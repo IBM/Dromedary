@@ -25,11 +25,26 @@ Dromedary is an open-source self-aligned language model trained with minimal hum
 
 </p>
 
+#### Update (Dromedary-2-SFT)
+
+The new **SELF-ALIGN** process in *Dromedary-2* only involves two stages, We replace the first stage with diverse user prompts from [ShareGPT](https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered), [Dolly-15k](https://huggingface.co/datasets/databricks/databricks-dolly-15k), [OpenAssistant](https://huggingface.co/datasets/OpenAssistant/oasst1), and [OpenOrca](https://huggingface.co/datasets/Open-Orca/OpenOrca), and use an improved version create an improved prompt with one additional exemplar that encourages the LLM AI-assistant to generate responses in a [general-specific-general response style](https://arxiv.org/abs/2305.15717), i.e., initiate with an overview, delve into specifics, and wrap up with a summary. Specifically, we directly take the one-shot exemplar from [FastChat](https://github.com/lm-sys/FastChat/blob/2855bf974f0973f85adb2bb7a9d075255b353ecf/fastchat/conversation.py\#L31) as this additional exemplar.
+
+By utilizing the new principle-driven self-alignment prompt, we found that the [LLaMA-2](https://arxiv.org/abs/2307.09288) base model with the improved ICL exemplars can achieve enhanced performance even without the verbose cloning phase nor inference-time few-shot examples. Therefore, we also drop the last stage of the original **SELF-ALIGN** process.
+
+#### Dromedary-2-RLAIF
+
+The Self-ALignMent with principle-fOllowiNg (SALMON) training pipeline of *Dromedary-2* can be found in the [IBM/SALMON](https://github.com/IBM/SALMON) repository.
+
+#### Original Dromedary
+
+The repo for the original Dromedary release is in the [`dromedary_v1`](https://github.com/IBM/Dromedary/tree/dromedary_v1) branch.
+
 ## Setup
 
 To train your own self-aligned model with the LLaMA base language model, or to perform inference on GPUs with quantities differing from 1, 2, 4, or 8 (i.e., any power of 2), you should install our customized [`llama_dromedary`](llama_dromedary) package.
 
 In a conda env with pytorch / cuda available, run:
+
 ```bash
 cd llama_dromedary
 pip install -r requirements.txt
@@ -48,6 +63,7 @@ cd ..
 ```
 
 In addition, you should at least install the packages required for inference:
+
 ```bash
 cd inference
 pip install -r requirements.txt
@@ -79,15 +95,6 @@ We provide the full [training pipeline](training) of Dromedary for reproduction.
 
 All the human annotations used in this project can be found [here](prompts).
 
-### TODOs
-
-- [x] Add the evaluation code for TruthfulQA and HHH Eval.
-- [x] Release Dromedary delta weights at Hugging Face model hub.
-- [x] Release the synthetic training data of Dromedary.
-- [x] Add support for stream inference in the chatbot demo.
-- [ ] Add the `requirements.txt` for the training pipeline.
-- [ ] Add support for Hugging Face native pipeline in the released model hub.
-
 ### Citation
 
 Please cite the following paper if you use the data or code in this repo.
@@ -106,4 +113,4 @@ Please cite the following paper if you use the data or code in this repo.
 ### Acknowledgements
 
 We thank Yizhong Wang for providing the code for the parse analysis plot.
-We also thank [Meta LLaMA team](https://github.com/facebookresearch/llama), [Standford Alpaca team](https://github.com/tatsu-lab/stanford_alpaca), [Vicuna team](https://github.com/lm-sys/FastChat), [Alpaca-LoRA](https://github.com/tloen/alpaca-lora), and [Hugging Face PEFT](https://github.com/huggingface/peft) for their open-source efforts in democratizing large language models.
+We also thank [Meta LLaMA team](https://github.com/facebookresearch/llama), [Standford Alpaca team](https://github.com/tatsu-lab/stanford_alpaca), [Vicuna team](https://github.com/lm-sys/FastChat), [Alpaca-LoRA](https://github.com/tloen/alpaca-lora), [QLoRA](https://github.com/artidoro/qlora), and [Hugging Face PEFT](https://github.com/huggingface/peft) for their open-source efforts in democratizing large language models.
