@@ -33,7 +33,7 @@ By utilizing the new principle-driven self-alignment prompt, we found that the [
 
 ### Dromedary-2 (RLAIF)
 
-The Self-ALignMent with principle-fOllowiNg (SALMON) training pipeline of *Dromedary-2* can be found in the [`IBM/SALMON`](https://github.com/IBM/SALMON) repository.
+The SALMON (Self-ALignMent with principle-fOllowiNg reward models) training pipeline of *Dromedary-2* can be found in the [`IBM/SALMON`](https://github.com/IBM/SALMON) repository.
 
 ### Original Dromedary
 
