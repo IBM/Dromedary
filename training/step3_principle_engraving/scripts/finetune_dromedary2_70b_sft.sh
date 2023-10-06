@@ -16,14 +16,11 @@ export OMP_NUM_THREADS=8
 LEARNING_RATE=1e-4
 BATCH_SIZE=4
 GRAD_ACCUMULATION=4
+NUM_EPOCHS=1
+CKPT_STEPS=500
 
 export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n $((SYNC_NODE_RANK + 1)) | tail -n 1)
 export MASTER_PORT=9901
-
-TOTAL_BATCH_SIZE=768
-LEARNING_RATE=4e-4
-NUM_EPOCHS=1
-CKPT_STEPS=50
 
 torchrun \
     --standalone \
@@ -44,11 +41,11 @@ torchrun \
     --bits 4 \
     --lora_r 64 \
     --output_dir "$MODEL_DIR/dromedary2-70b-qlora-sft" \
-    --num_train_epochs 1 \
+    --num_train_epochs $NUM_EPOCHS \
     --group_by_length False \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
-    --save_steps 500 \
+    --save_steps $CKPT_STEPS \
     --save_total_limit 3 \
     --weight_decay 0.0 \
     --warmup_ratio 0.03 \
