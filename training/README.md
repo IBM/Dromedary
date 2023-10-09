@@ -24,6 +24,8 @@ The new first stage, is merely subsampling and cleaning prompts from [ShareGPT](
 <summary> <strong> Running the code </strong> </summary>
 
 ```bash
+cd step1_prompt_cleaning
+
 python subsample_openorca_prompts.py \
     --train_data_path "/path/to/your/l1M-GPT4-Augmented.parquet (obtained from OpenOrca)" \
     --output_path "/path/to/your/openorca_prompts.json"
