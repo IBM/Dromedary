@@ -145,14 +145,14 @@ def load_oasst_data():
                 {
                     "instruction": oasst_tree[0]["text"],
                     "input": "",
-                    "output": oasst_tree[1]["text"],
+                    "output": "",
                 }
             )
     print("OASST examples:", count)
     return oasst_examples
 
 
-def filter_and_clean_examples(merged_examples, english_only):
+def filter_and_clean_examples(merged_examples):
     tokenizer = AutoTokenizer.from_pretrained("TheBloke/dromedary-65b-lora-HF")
     max_seq_length = 256
     filtered_examples = []
@@ -166,7 +166,6 @@ def filter_and_clean_examples(merged_examples, english_only):
             "output": "",
         }
         for example in merged_examples
-        if (example["instruction"].isascii() or not english_only)
     ]
 
     for example in tqdm.tqdm(merged_examples):
@@ -211,7 +210,7 @@ def main(
     merged_examples = (
         dolly_examples + oasst_examples + sharegpt_examples + openorca_examples
     )
-    filtered_examples = filter_and_clean_examples(merged_examples, english_only)
+    filtered_examples = filter_and_clean_examples(merged_examples)
 
     print("Total examples:", len(filtered_examples))
 
