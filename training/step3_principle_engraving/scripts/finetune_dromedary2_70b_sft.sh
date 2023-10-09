@@ -1,5 +1,5 @@
 # We use 1 x 8 = 80 A100-80GB GPUs
-# salloc --nodes 8 --time 6:00:00 --gres=gpu:32g:6 srun bash scripts/finetune_dromedary2_70b_sft.sh
+# salloc --nodes 8 --time 24:00:00 --gres=gpu:80g:8 srun bash scripts/finetune_dromedary2_70b_sft.sh
 set -e
 set -x
 
