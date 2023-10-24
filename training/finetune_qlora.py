@@ -37,7 +37,7 @@ from data_utils_sft import (
     make_sft_data_module,
     IGNORE_INDEX,
 )
-from models.qlora_model import get_accelerate_model
+from qlora_model import get_accelerate_model
 
 
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -262,6 +262,7 @@ def train():
     use_llama_base_model = (
         "dromedary" in args.model_name_or_path.lower()
         or "llama" in args.model_name_or_path.lower()
+        or "llemma" in args.model_name_or_path.lower()
     )
 
     if use_llama_base_model:
