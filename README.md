@@ -8,6 +8,8 @@
 
 <!-- # Dromedary -->
 
+### NeurIPS 2023 (Spotlight)
+
 ## Principle-Driven Self-Alignment of Language Models from Scratch with Minimal Human Supervision
 
 </div>
@@ -30,6 +32,7 @@ Dromedary is an open-source self-aligned language model trained with minimal hum
 To train your own self-aligned model with the LLaMA base language model, or to perform inference on GPUs with quantities differing from 1, 2, 4, or 8 (i.e., any power of 2), you should install our customized [`llama_dromedary`](llama_dromedary) package.
 
 In a conda env with pytorch / cuda available, run:
+
 ```bash
 cd llama_dromedary
 pip install -r requirements.txt
@@ -48,6 +51,7 @@ cd ..
 ```
 
 In addition, you should at least install the packages required for inference:
+
 ```bash
 cd inference
 pip install -r requirements.txt
