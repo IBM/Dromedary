@@ -8,6 +8,8 @@
 
 <!-- # Dromedary -->
 
+### NeurIPS 2023 (Spotlight)
+
 ## Principle-Driven Self-Alignment of Language Models from Scratch with Minimal Human Supervision
 
 </div>

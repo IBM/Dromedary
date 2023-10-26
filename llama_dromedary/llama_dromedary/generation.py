@@ -449,7 +449,7 @@ class Llama:
             params.max_seq_len,
             params.max_shared_seq_len,
         )
-        tokens = torch.full((bsz, total_len), self.tokenizer.pad_id).cuda().long()
+        tokens = torch.full((bsz, total_len), self.tokenizer.eos_id).cuda().long()
 
         for i, (prompt_t, target_t) in enumerate(zip(prompt_tokens, target_tokens)):
             tokens[i, : len(prompt_t)] = torch.tensor(prompt_t).long()

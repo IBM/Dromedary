@@ -7,7 +7,7 @@ import fire
 import time
 import tqdm
 
-from llama_dromedary.utils import setup_model_parallel, sync_model_parallel, load_model, llama_scoring
+from llama_dromedary import Llama
 
 from datasets import load_dataset
 
@@ -24,7 +24,9 @@ def measure_multiple_choice_grade(samples):
     def argmax(array):
         """argmax with deterministic pseudorandom tie breaking."""
         max_indices = np.arange(len(array))[array == np.max(array)]
-        idx = int(hashlib.sha256(np.asarray(array).tobytes()).hexdigest(),16) % len(max_indices)
+        idx = int(hashlib.sha256(np.asarray(array).tobytes()).hexdigest(), 16) % len(
+            max_indices
+        )
         return max_indices[idx]
 
     for sample in samples:
@@ -61,18 +63,16 @@ def main(
     meta_prompt = "".join(data)
     meta_prompt = meta_prompt.strip()
 
-    global_rank, world_size = setup_model_parallel()
-    if global_rank > 0:
-        sys.stdout = open(os.devnull, "w")
-
     t0 = time.time()
-    generator = load_model(
-        ckpt_dir, tokenizer_path, global_rank, world_size,
-        max_seq_len, max_batch_size, max_shared_seq_len,
-        disable_cache=True,
+    generator = Llama.build(
+        ckpt_dir=ckpt_dir,
+        tokenizer_path=tokenizer_path,
+        max_seq_len=max_seq_len,
+        max_batch_size=max_batch_size,
+        max_shared_seq_len=max_shared_seq_len,
     )
     t1 = time.time()
-    loading_time = t1-t0
+    loading_time = t1 - t0
     print("Model loading time on %d: " % group_size, loading_time)
 
     dataset = load_dataset("truthful_qa", "multiple_choice", split="validation")
@@ -83,8 +83,8 @@ def main(
         example = {}
         example["input"] = data_point["question"]
         example["target_scores"] = {}
-        mc1_choices = data_point["mc1_targets"]['choices']
-        mc1_scores = data_point["mc1_targets"]['labels']
+        mc1_choices = data_point["mc1_targets"]["choices"]
+        mc1_scores = data_point["mc1_targets"]["labels"]
 
         for choice, score in zip(mc1_choices, mc1_scores):
             example["target_scores"][choice] = score
@@ -92,11 +92,20 @@ def main(
 
     predictions = []
 
-    sync_model_parallel()
+    global_rank = int(os.environ.get("RANK", 0))
+
     # only show tqdm at rank 0
     for example in tqdm.tqdm(examples, disable=global_rank > 0):
         targets = list(example["target_scores"].keys())
-        log_prob = get_log_prob(generator, example, targets, meta_prompt, generate_prompt_fn, temperature, max_seq_len)
+        log_prob = get_log_prob(
+            generator,
+            example,
+            targets,
+            meta_prompt,
+            generate_prompt_fn,
+            temperature,
+            max_seq_len,
+        )
         full_pred = {}
         full_pred["choice"] = targets
         full_pred["log_prob"] = log_prob
@@ -107,11 +116,18 @@ def main(
     print(f"MC1 grade: {mc_grad}")
 
 
-def get_log_prob(generator, example, targets, meta_prompt, generate_prompt_fn, temperature, max_seq_len):
+def get_log_prob(
+    generator,
+    example,
+    targets,
+    meta_prompt,
+    generate_prompt_fn,
+    temperature,
+    max_seq_len,
+):
     del max_seq_len
     answer_candidates = targets
     inputs = example["input"]
-
 
     input_story = f"""Question: {inputs}
 
@@ -139,7 +155,7 @@ I'm in an exam and the above is a true/false question. I'm not sure whether the 
         all_prompts.append(prompt)
         all_targets.append(" false")
 
-    log_prob = llama_scoring(generator, all_prompts, all_targets, temperature)
+    log_prob = generator.score(all_prompts, all_targets, temperature)
     true_log_prob = []
     for i in range(0, len(answer_candidates), 2):
         true_log_prob.append(log_prob[i] - log_prob[i + 1])
